@@ -75,6 +75,18 @@ local orderedmetatable = {
 
             return k, v
         end
+    end,
+
+    __gc = function (t)
+        local id = ssub(tostring(t), 8)
+
+        if ins_order[id] then
+            ins_order[id] = nil
+        end
+
+        if key_ins_order[id] then
+            key_ins_order = nil
+        end
     end
 }
 
