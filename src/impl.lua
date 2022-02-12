@@ -86,7 +86,7 @@ end
 -- Performs t[key] = value & updates the insertion table accordingly. Optionally order the element.
 function pkg.add(t, key, value, reorder)
     assert(type(key) == "string", "key must be a string.")
-    assert(value ~= nil, "value must not be nil. Use the rem function to remove elements.")
+    assert(value ~= nil, "value must not be nil. Use the del function to remove elements.")
     assert(getmetatable(t) == orderedmetatable, "t must be an orderedtable.")
 
     local id = ssub(tostring(t), 8)
