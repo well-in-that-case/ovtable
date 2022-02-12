@@ -53,7 +53,8 @@ local ssub,
       assert,
       tremove,
       tostring,
-      getmetatable = string.sub, type, rawset, assert, table.remove, tostring, getmetatable
+      setmetatable,
+      getmetatable = string.sub, type, rawset, assert, table.remove, tostring, setmetatable, getmetatable
 
 --[[
     Metatable used to implement ordered tables. Stored in a local for identification purposes.
@@ -85,7 +86,7 @@ local orderedmetatable = {
         end
 
         if key_ins_order[id] then
-            key_ins_order = nil
+            key_ins_order[id] = nil
         end
     end
 }
