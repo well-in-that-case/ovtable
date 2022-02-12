@@ -26,6 +26,10 @@ do
     collectgarbage()
     collectgarbage()
     print("Memory usage: ", collectgarbage "count")
+
+    for key, value in pairs(t) do
+        print(key, value)
+    end
 end
 
 collectgarbage()
