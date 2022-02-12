@@ -48,10 +48,12 @@ local ins_order = {} -- Tracks insertion order.
 local key_ins_order = {} -- Mirror of `ins_order` to fetch the order of the key by its name.
 
 local ssub,
+      type,
       rawset,
       assert,
       tremove,
-      tostring = string.sub, rawset, assert, table.remove, tostring
+      tostring,
+      getmetatable = string.sub, type, rawset, assert, table.remove, tostring, getmetatable
 
 --[[
     Metatable used to implement ordered tables. Stored in a local for identification purposes.
