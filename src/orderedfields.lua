@@ -103,6 +103,8 @@ local orderedmetatable = {
     __index = pkg
 }
 
+pkg.orderedmetatable = orderedmetatable
+
 -- Returns a new orderedtable.
 function pkg.orderedtable()
     return setmetatable({}, orderedmetatable)
