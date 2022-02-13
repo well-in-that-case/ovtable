@@ -34,18 +34,18 @@ SOFTWARE.
         - The purpose of the mirror table is to fetch insertion order by key in O(1).
 
         - Setting a key to nil won't reorder the insertion table, but it will by skipped by __pairs.
-        - If you want to completely abolish an element, use the `del` function. It's O(n); n = #table - 1.
+        - If you want to correctly abolish an ordered field, use the `del` function. It's O(n); n = #table - 1.
 
         - Numeric indices aren't supported. They're already ordered.
         - Adding them to the table works fine, I just don't interact with them.
 
         - Manually adding fields doesn't order them. I also just ignore them, so you can mix your table up.
         - Careful with the ignore though, because pairs won't show your elements. They're still there however.
-]]
+--]]
 
 local pkg = {} -- Main package.
-local ins_order = {} -- Tracks insertion order.
-local key_ins_order = {} -- Mirror of `ins_order` to fetch the order of the key by its name.
+local ins_order = {} -- Tracks insertion order; L1 table.
+local key_ins_order = {} -- Mirror of `ins_order` to fetch the order of the key by its name; L2 table.
 
 local ssub,
       type,
@@ -60,16 +60,26 @@ local ssub,
     Metatable used to implement ordered tables. Stored in a local for identification purposes.
 --]]
 local orderedmetatable = {
-    __pairs = function (t, order)
+    __pairs = function (t)
         local idx = 1
         local id = ssub(tostring(t), 8)
 
-        return function ()
-            local k, v = ins_order[id][idx], t[ins_order[id][idx]]
+        local L1 = ins_order[id]
+        local L2 = key_ins_order[id]
 
-            while t[ins_order[id][idx]] == nil and idx <= #ins_order[id] do
+        if not L1 or not L2 then
+            error "L1 & L2 tables are empty."
+        end
+
+        return function ()
+            local k = L1[idx]
+            local v = t[k]
+
+            while v == nil and idx <= #L1 do
                 idx = idx + 1
-                k, v = ins_order[id][idx], t[ins_order[id][idx]]
+
+                k = L1[idx]
+                v = t[k]
             end
 
             idx = idx + 1
@@ -97,48 +107,41 @@ function pkg.orderedtable()
 end
 
 -- Performs t[key] = value & updates the insertion table accordingly. Optionally order the element.
-function pkg.add(t, key, value, reorder)
+-- If you don't want to order the element, you should prefer traditional assignment; that's faster.
+function pkg.add(t, key, value, order)
     assert(type(key) == "string", "key must be a string.")
     assert(value ~= nil, "value must not be nil. Use the del function to remove elements.")
     assert(getmetatable(t) == orderedmetatable, "t must be an orderedtable.")
 
     local id = ssub(tostring(t), 8)
 
-    if reorder == nil then
-        reorder = true
-    end
-
-    if reorder == true then
+    if order ~= false then
         if not ins_order[id] then
             ins_order[id] = {}
         end
-        ins_order[id][#ins_order[id] + 1] = key
+
+        local idx = #ins_order[id] + 1
+
+        ins_order[id][idx] = key
 
         if not key_ins_order[id] then
             key_ins_order[id] = {}
         end
-        key_ins_order[id][key] = #key_ins_order[id] + 1
+
+        key_ins_order[id][key] = idx
     end
 
-    rawset(t, key, value)
+    t[key] = value
 
     return t[key] ~= nil
 end
 
--- Syntactic sugar for calling `del` and `add` in succession. Optionally reorder the element.
-function pkg.mod(t, key, value, reorder)
+-- Syntactic sugar for calling `del` and `add` in succession. Use this over `t[k] = v` when you want to reorder `k`.
+function pkg.mod(t, key, value)
     assert(getmetatable(t) == orderedmetatable, "t must be an orderedtable.")
     assert(type(key) == "string", "key must be a string.")
 
-    if reorder == nil then
-        reorder = true
-    end
-
-    if reorder == false then
-        return pkg.add(t, key, value, reorder)
-    else
-        return pkg.del(t, key) and pkg.add(t, key, value, true)
-    end
+    return pkg.del(t, key) and pkg.add(t, key, value, true)
 end
 
 -- Deletes and removes the insertion table entries for the keys you pass.
@@ -165,6 +168,43 @@ function pkg.del(t, ...)
     end
 
     return true
+end
+
+-- Gets an ordered field's value by its insertion index.
+-- Setting `give_key_name` to `true` returns (key_name, key_value) instead of key_value.
+function pkg.getindex(t, idx, give_key_name)
+    assert(type(idx) == "number", "idx must be a number.")
+    assert(getmetatable(t) == orderedmetatable, "t must be an orderedtable.")
+
+    local id = ssub(tostring(t), 8)
+    local kstr = ins_order[id]
+
+    if not kstr then
+        return nil, "this table has no keys"
+    else
+        local k = kstr[idx]
+
+        if give_key_name == true then
+            return k, t[k]
+        else
+            return t[k]
+        end
+    end
+end
+
+-- Returns the insertion index of the key.
+function pkg.keyindex(t, key)
+    assert(type(key) == "string", "key must be a string.")
+    assert(getmetatable(t) == orderedmetatable, "t must be an orderedtable.")
+
+    local addr = ssub(tostring(t), 8)
+    local kstr = key_ins_order[addr]
+
+    if not kstr then
+        return nil, "this table has no keys"
+    else
+        return kstr[key]
+    end
 end
 
 return pkg
