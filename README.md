@@ -106,14 +106,19 @@ end
 #### How do I modify a key without resetting its order?
 Use the traditional `t.key = newvalue` syntax.
 
-#### How do I modify a key and reset its order?
-Use the `pkg.mod` function.
+#### How can I change the metatable of my ordered table?
+Your boilerplate metatable needs to implement `pkg.orderedmetatable.__gc` and `pkg.orderedmetatable.__index`. See this code:
+```lua
+local o = require "orderedfields"
+local t = o.orderedtable()
 
-#### How do I get a field by its insertion index?
-Use the `pkg.getindex` function.
+local basemt = o.orderedmetatable
+basemt.__metamethod = ...
 
-#### How do I get a key's insertion index by name?
-Use the `pkg.keyindex` function.
+setmetatable(t, basemt)
+```
+If you fail to set `__gc` as `orderedmetatable.__gc`, then your memory will leak, because L1 & L2 table cleanup won't invoke.
+You may override `__index`, but you'll need to implement method support yourself when you do that. It points to the package table by default.
 
 ## Documentation
 - `function orderedtable(override_pairs)`
