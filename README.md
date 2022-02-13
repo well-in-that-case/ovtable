@@ -93,7 +93,7 @@ Yes! `t:getindex(...)` is equal to `pkg.getindex(t, ...)`.
 - If you set `override_pairs` as `true`, then `pairs` will behave as an `orderediterator`.
   - If you wish to circumvent this behavior in one specific loop, use the `next` function instead of `pairs`.
  
-- If `pairs` was not overriden, then you can use the `orderediterator` function as your iterator:
+- If `pairs` was not overridden, then you can use the `orderediterator` function as your iterator:
 ```lua
 local o = require "orderedfields"
 local t = o.orderedtable()
