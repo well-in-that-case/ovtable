@@ -53,3 +53,6 @@ mytable[1] = "hello world"
 mytable.key = "hello world"
 ```
 Works fine!
+
+#### How do I modfiy a key without resetting its order?
+Use `t.key = newvalue` or `pkg.mod(t, key, newvalue, false)`.
