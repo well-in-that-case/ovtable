@@ -98,7 +98,9 @@ local orderedmetatable = {
         if key_ins_order[id] then
             key_ins_order[id] = nil
         end
-    end
+    end,
+
+    __index = pkg
 }
 
 -- Returns a new orderedtable.
@@ -106,30 +108,27 @@ function pkg.orderedtable()
     return setmetatable({}, orderedmetatable)
 end
 
--- Performs t[key] = value & updates the insertion table accordingly. Optionally order the element.
--- If you don't want to order the element, you should prefer traditional assignment; that's faster.
-function pkg.add(t, key, value, order)
+-- Performs t[key] = value & updates the insertion table accordingly.
+function pkg.add(t, key, value)
     assert(type(key) == "string", "key must be a string.")
     assert(value ~= nil, "value must not be nil. Use the del function to remove elements.")
     assert(getmetatable(t) == orderedmetatable, "t must be an orderedtable.")
 
     local id = ssub(tostring(t), 8)
 
-    if order ~= false then
-        if not ins_order[id] then
-            ins_order[id] = {}
-        end
-
-        local idx = #ins_order[id] + 1
-
-        ins_order[id][idx] = key
-
-        if not key_ins_order[id] then
-            key_ins_order[id] = {}
-        end
-
-        key_ins_order[id][key] = idx
+    if not ins_order[id] then
+        ins_order[id] = {}
     end
+
+    local idx = #ins_order[id] + 1
+
+    ins_order[id][idx] = key
+
+    if not key_ins_order[id] then
+        key_ins_order[id] = {}
+    end
+
+    key_ins_order[id][key] = idx
 
     t[key] = value
 
