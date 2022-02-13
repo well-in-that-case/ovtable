@@ -9,7 +9,7 @@ See this [article](https://dev.to/wellinthatcase/new-lua-54-ordered-field-implem
 - `pkg.add(table, string, any) -> boolean`
 - `pkg.mod(table, string, any) -> boolean`
 - `pkg.del(table, string) -> boolean, (false, string)`
-- `pkg.getindex(table, number) -> any, (nil, string)`
+- `pkg.getindex(table, number) -> any, (string, string), (nil, string)`
 - `pkg.keyindex(table, string) -> number, (nil, string)`
 
 ## Examples
