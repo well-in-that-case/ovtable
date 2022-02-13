@@ -95,6 +95,21 @@ Works fine!
 #### Can I use these functions with method syntax?
 Yes! `t:getindex(...)` is equal to `pkg.getindex(t, ...)`.
 
+#### How can I loop over my table and include unordered fields / numeric indices?
+Use this code:
+```lua
+for k, v in next, table do
+  print(k, v)
+end
+```
+Instead of this code:
+```lua
+for k, v in pairs(table) do 
+  print(k, v)
+end
+```
+Ordered tables modify the `__pairs` metamethod, so `pairs` will only work with ordered fields.
+
 #### How do I modify a key without resetting its order?
 Use the traditional `t.key = newvalue` syntax.
 
