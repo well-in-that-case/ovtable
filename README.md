@@ -52,4 +52,4 @@ local mytable = otable.orderedtable()
 mytable[1] = "hello world"
 mytable.key = "hello world"
 ```
-works fine! Be aware, they may invoke UB though. This implementation is new, not concreted, not fully stress-tested, so if you (i.e) override an ordered key with an unordered one, expect undefined behavior!
+Works fine!
