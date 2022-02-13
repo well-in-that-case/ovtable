@@ -105,16 +105,25 @@ local orderedmetatable = {
 
 pkg.orderedmetatable = orderedmetatable
 
--- Returns a new orderedtable.
-function pkg.orderedtable()
-    return setmetatable({}, orderedmetatable)
+-- Returns a new orderedtable. Optionally override the `__pairs` metamethod.
+function pkg.orderedtable(override_pairs)
+    if override_pairs == true then
+        return setmetatable({}, orderedmetatable)
+    else
+        return setmetatable({}, { __gc = orderedmetatable.__gc, __index = orderedmetatable.__index })
+    end
+end
+
+-- Returns an iterator for ordered fields. If you set `override_pairs` as true, this is the same as `pairs`.
+function pkg.orderediterator(...)
+    return orderedmetatable.__pairs(...)
 end
 
 -- Performs t[key] = value & updates the insertion table accordingly.
 function pkg.add(t, key, value)
     assert(type(key) == "string", "key must be a string.")
     assert(value ~= nil, "value must not be nil. Use the del function to remove elements.")
-    assert(getmetatable(t) == orderedmetatable, "t must be an orderedtable.")
+    assert(getmetatable(t).__gc == orderedmetatable.__gc, "t must be an orderedtable.")
 
     local id = ssub(tostring(t), 8)
 
@@ -139,7 +148,7 @@ end
 
 -- Syntactic sugar for calling `del` and `add` in succession. Use this over `t[k] = v` when you want to reorder `k`.
 function pkg.mod(t, key, value)
-    assert(getmetatable(t) == orderedmetatable, "t must be an orderedtable.")
+    assert(getmetatable(t).__gc == orderedmetatable.__gc, "t must be an orderedtable.")
     assert(type(key) == "string", "key must be a string.")
 
     return pkg.del(t, key) and pkg.add(t, key, value, true)
@@ -147,7 +156,7 @@ end
 
 -- Deletes and removes the insertion table entries for the keys you pass.
 function pkg.del(t, ...)
-    assert(getmetatable(t) == orderedmetatable, "t must be an orderedtable.")
+    assert(getmetatable(t).__gc == orderedmetatable.__gc, "t must be an orderedtable.")
 
     local id = ssub(tostring(t), 8)
 
@@ -175,7 +184,7 @@ end
 -- Setting `give_key_name` to `true` returns (key_name, key_value) instead of key_value.
 function pkg.getindex(t, idx, give_key_name)
     assert(type(idx) == "number", "idx must be a number.")
-    assert(getmetatable(t) == orderedmetatable, "t must be an orderedtable.")
+    assert(getmetatable(t).__gc == orderedmetatable.__gc, "t must be an orderedtable.")
 
     local id = ssub(tostring(t), 8)
     local kstr = ins_order[id]
@@ -196,7 +205,7 @@ end
 -- Returns the insertion index of the key.
 function pkg.keyindex(t, key)
     assert(type(key) == "string", "key must be a string.")
-    assert(getmetatable(t) == orderedmetatable, "t must be an orderedtable.")
+    assert(getmetatable(t).__gc == orderedmetatable.__gc, "t must be an orderedtable.")
 
     local addr = ssub(tostring(t), 8)
     local kstr = key_ins_order[addr]
