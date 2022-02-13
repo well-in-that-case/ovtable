@@ -9,7 +9,7 @@ See this [article](https://dev.to/wellinthatcase/new-lua-54-ordered-field-implem
 - `pkg.add(table, string, any) -> boolean`
 - `pkg.mod(table, string, any) -> boolean`
 - `pkg.del(table, string) -> boolean, (false, string)`
-- `pkg.getindex(table, number) -> any, (string, string), (nil, string)`
+- `pkg.getindex(table, number, boolean) -> any, (string, string), (nil, string)`
 - `pkg.keyindex(table, string) -> number, (nil, string)`
 
 ## Examples
@@ -89,20 +89,19 @@ Works fine!
 #### Can I use these functions with method syntax?
 Yes! `t:getindex(...)` is equal to `pkg.getindex(t, ...)`.
 
-#### How can I loop over my table and include unordered fields / numeric indices?
-Use this code:
+#### Nuance on how loops work
+- If you set `override_pairs` as `true`, then `pairs` will behave as an `orderediterator`.
+  - If you wish to circumvent this behavior in one specific loop, use the `next` function instead of `pairs`.
+ 
+- If `pairs` was not overriden, then you can use the `orderediterator` function as your iterator:
 ```lua
-for k, v in next, table do
-  print(k, v)
+local o = require "orderedfields"
+local t = o.orderedtable()
+
+for key, value in t:orderediterator() do
+  print(key, value)
 end
 ```
-Instead of this code:
-```lua
-for k, v in pairs(table) do 
-  print(k, v)
-end
-```
-Ordered tables modify the `__pairs` metamethod, so `pairs` will only work with ordered fields.
 
 #### How do I modify a key without resetting its order?
 Use the traditional `t.key = newvalue` syntax.
@@ -115,3 +114,26 @@ Use the `pkg.getindex` function.
 
 #### How do I get a key's insertion index by name?
 Use the `pkg.keyindex` function.
+
+## Documentation
+- `function orderedtable(override_pairs)`
+  - Returns a new ordered table, which can optionally change `pairs` to an ordered iterator when used on ordered tables.
+- `function orderediterator(t)`
+  - Returns an iterator that appropriately loops over ordered fields.
+- `function getindex(t, idx, give_key_name)` 
+  - Gets the field's value by insertion index (`idx`). `give_key_name = true` will return the key name and key value.
+  - Returns `key_value` inherently.
+  - Returns `nil` and `reason` if the search fails.
+  - Returns `key_name` and `key_value` if `give_key_name` is set as `true`.
+- `function keyindex(t, key`)
+  - Returns the numeric insertion index of `key` in `t`.
+  - Returns `nil` and `reason` if the search fails.
+- `function add(t, key, value)`
+  - Adds a new ordered field to `t` with the respective parameters.
+  - Returns a boolean indicating if the key was added.
+- `function mod(t, key, value)`
+  - Modifies an ordered field by calling `del` and `add` in succession. This is how you reorder on modification.
+  - Returns the combined result of `mod` and `add`.
+- `function del(t, key)`
+  - Deletes an ordered field and its insertion table entries.
+  - Returns `false` and `reason` if the key wasn't deleted.
