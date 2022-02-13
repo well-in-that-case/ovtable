@@ -10,6 +10,14 @@ Deleting an orderedfield can be done manually but this may conflict with the ins
 
 Unlike all other ordered field implementations, this does not use a linked list or a classic proxy table implementation. That makes this the most dynamic & freedom-oriented design that I've seen myself. This comes with one con though: since it's not a proxy table, I cannot control manual assignments, as `newindex` will only run once for each key.
 
+## Signatures
+- `pkg.orderedtable() -> table`
+- `pkg.add(table, string, any) -> boolean`
+- `pkg.mod(table, string, any) -> boolean`
+- `pkg.del(table, string) -> boolean, (false, string)`
+- `pkg.getindex(table, number) -> any, (nil, string)`
+- `pkg.keyindex(table, string) -> number, (nil, string)`
+
 ## Examples
 I'll inline it for now.
 
@@ -43,6 +51,36 @@ local mytable = otable.orderedtable()
 otable.mod(mytable, "key", value)
 ```
 
+Modifying an ordered field without changing the insertion index:
+```lua
+local otable = require "orderedtable"
+local mytable = otable.orderedtable()
+
+mytable.key = value
+```
+
+Getting the insertion index of a key:
+```lua
+local otable = require "orderedtable"
+local mytable = otable.orderedtable()
+
+otable.add(mytable, "key", "value")
+otable.add(mytable, "key1", "value1")
+
+otable.keyindex(mytable, "key1") --> 2
+```
+
+Getting the value @ an insertion index:
+```lua
+local otable = require "orderedtable"
+local mytable = otable.orderedtable()
+
+otable.add(mytable, "key", "value")
+otable.add(mytable, "key1", "value1")
+
+otable.getindex(mytable, 2) --> "value1"
+```
+
 #### Can I still use numeric indices or normal fields?
 Yes!
 ```lua
@@ -55,4 +93,13 @@ mytable.key = "hello world"
 Works fine!
 
 #### How do I modify a key without resetting its order?
-Use `t.key = newvalue` or `pkg.mod(t, key, newvalue, false)`.
+Use the traditional `t.key = newvalue` syntax.
+
+#### How do I modify a key and reset its order?
+Use the `pkg.mod` function.
+
+#### How do I get a field by its insertion index?
+Use the `pkg.getindex` function.
+
+#### How do I get a key's insertion index by name?
+Use the `pkg.keyindex` function.
