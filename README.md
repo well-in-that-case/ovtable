@@ -92,6 +92,9 @@ mytable.key = "hello world"
 ```
 Works fine!
 
+#### Can I use these functions with method syntax?
+Yes! `t:getindex(...)` is equal to `pkg.getindex(t, ...)`.
+
 #### How do I modify a key without resetting its order?
 Use the traditional `t.key = newvalue` syntax.
 
