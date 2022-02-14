@@ -265,3 +265,6 @@ These benchmarks were performed on an AMD-FX6300 @ 4.1GHz, using 800Mhz dual-cha
             - `getindex` is 120% faster using optional optimizations.
   
 By using optional optimizations, you're agreeing with yourself that you're knowledgable enough to debug worse error messages, or familiar enough with `ovtable` to avoid errors as a whole. These options are best used in heavy stress environments (i.e, a benchmark) and are more harm than foul when used normally.
+
+## The End
+If you fancy this project, give it a star!
