@@ -1,4 +1,4 @@
-local otable = require "orderedfields"
+local otable = require "ovtable"
 
 do
     local t = otable.orderedtable()
