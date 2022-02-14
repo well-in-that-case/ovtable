@@ -56,6 +56,9 @@ local ssub,
       setmetatable,
       getmetatable = string.sub, type, rawset, assert, table.remove, tostring, setmetatable, getmetatable
 
+local use_assertioncalls = true
+local predef_table_unqid = nil
+
 --[[
     Metatable used to implement ordered tables. Stored in a local for identification purposes.
 --]]
@@ -68,7 +71,7 @@ local orderedmetatable = {
         local L2 = key_ins_order[id]
 
         if not L1 or not L2 then
-            error "L1 & L2 tables are empty."
+            return nil, "internal tables are empty."
         end
 
         return function ()
@@ -121,11 +124,13 @@ end
 
 -- Performs t[key] = value & updates the insertion table accordingly.
 function pkg.add(t, key, value)
-    assert(type(key) == "string", "key must be a string.")
-    assert(value ~= nil, "value must not be nil. Use the del function to remove elements.")
-    assert(getmetatable(t).__gc == orderedmetatable.__gc, "t must be an orderedtable.")
+    if use_assertioncalls == true then
+        assert(type(key) == "string", "key must be a string.")
+        assert(value ~= nil, "value must not be nil. Use the del function to remove elements.")
+        assert(getmetatable(t).__gc == orderedmetatable.__gc, "t must be an orderedtable.")
+    end
 
-    local id = ssub(tostring(t), 8)
+    local id = predef_table_unqid or ssub(tostring(t), 8)
 
     if not ins_order[id] then
         ins_order[id] = {}
@@ -148,17 +153,21 @@ end
 
 -- Syntactic sugar for calling `del` and `add` in succession. Use this over `t[k] = v` when you want to reorder `k`.
 function pkg.mod(t, key, value)
-    assert(getmetatable(t).__gc == orderedmetatable.__gc, "t must be an orderedtable.")
-    assert(type(key) == "string", "key must be a string.")
+    if use_assertioncalls == true then
+        assert(getmetatable(t).__gc == orderedmetatable.__gc, "t must be an orderedtable.")
+        assert(type(key) == "string", "key must be a string.")
+    end
 
     return pkg.del(t, key) and pkg.add(t, key, value, true)
 end
 
 -- Deletes and removes the insertion table entries for the keys you pass.
 function pkg.del(t, ...)
-    assert(getmetatable(t).__gc == orderedmetatable.__gc, "t must be an orderedtable.")
+    if use_assertioncalls then
+        assert(getmetatable(t).__gc == orderedmetatable.__gc, "t must be an orderedtable.")
+    end
 
-    local id = ssub(tostring(t), 8)
+    local id = predef_table_unqid or ssub(tostring(t), 8)
 
     if not ins_order[id] or not key_ins_order[id] then
         return false, "this orderedtable is empty (ins_order[id] or key_ins_order[id] is nil/empty)"
@@ -183,10 +192,12 @@ end
 -- Gets an ordered field's value by its insertion index.
 -- Setting `give_key_name` to `true` returns (key_name, key_value) instead of key_value.
 function pkg.getindex(t, idx, give_key_name)
-    assert(type(idx) == "number", "idx must be a number.")
-    assert(getmetatable(t).__gc == orderedmetatable.__gc, "t must be an orderedtable.")
+    if use_assertioncalls == true then
+        assert(type(idx) == "number", "idx must be a number.")
+        assert(getmetatable(t).__gc == orderedmetatable.__gc, "t must be an orderedtable.")
+    end
 
-    local id = ssub(tostring(t), 8)
+    local id = predef_table_unqid or ssub(tostring(t), 8)
     local kstr = ins_order[id]
 
     if not kstr then
@@ -204,10 +215,12 @@ end
 
 -- Returns the insertion index of the key.
 function pkg.keyindex(t, key)
-    assert(type(key) == "string", "key must be a string.")
-    assert(getmetatable(t).__gc == orderedmetatable.__gc, "t must be an orderedtable.")
+    if use_assertioncalls == true then
+        assert(type(key) == "string", "key must be a string.")
+        assert(getmetatable(t).__gc == orderedmetatable.__gc, "t must be an orderedtable.")
+    end
 
-    local addr = ssub(tostring(t), 8)
+    local addr = predef_table_unqid or ssub(tostring(t), 8)
     local kstr = key_ins_order[addr]
 
     if not kstr then
@@ -215,6 +228,28 @@ function pkg.keyindex(t, key)
     else
         return kstr[key]
     end
+end
+
+-- Whether or not to use assertion calls in these package's functions.
+-- Assertion calls can add upwards of 30% overhead during heavy stress.
+--
+-- There's no reason to keep using assertion calls if your code is stable & you're familiar with ovtable.
+function pkg.assertioncalls(state)
+    use_assertioncalls = state
+end
+
+-- If you're going to perform many ordered operations against a single table, use this.
+-- It'll remove string processing overhead from the package functions, since the ID won't be internally calculated.
+--
+-- Set `memory_address` to nil to repermit internal computation.
+-- Set `memory_address` to `pkg.generate_unqid` to do otherwise.
+function pkg.set_predef_table_unqid(memory_address)
+    predef_table_unqid = memory_address
+end
+
+-- Returns the unique ID for this table.
+function pkg.generate_unqid(ttable)
+    return ssub(tostring(ttable), 8)
 end
 
 return pkg
