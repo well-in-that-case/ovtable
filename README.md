@@ -2,10 +2,22 @@
 Performant, friendly, and extendable ordered fields for tables. This implementation retains support for numeric indices and unordered fields in the same table to ensure the most user-friendly experience while providing native performance identical with a normal table.
 
 ## Why you should use this over other implementations?
-VirtualOrderedFields avoids usage of proxy tables to ensure the highest lookup and insertion performance. Likewise, linked lists are avoided to seamlessly implement ordered fields in any dynamic environment that may not restrict this table to ordered operations only. You can make any table an ordered table anywhere in your code base, and behavior will remain identical.
+- Efficency:
+  - VirtualOrderedFields avoids usage of proxy tables to ensure the highest lookup and insertion performance. Likewise, linked lists are avoided to prevent unneeded hash lookups and seamlessly implement ordered fields in any dynamic environment that may not restrict this table to ordered operations only. You can make any table an ordered table anywhere in your codebase, and behavior will remain identical.
+
+- Features & user-friendliness:
+  - Direct table behavior isn't modified in any way. You can replace every table in a large codebase, and it'll be compatible.
+    - The only change is a metatable which, by default, only modifies garbage collection to clean the internal tables.
+  - VirtualOrderedFields has some neat functions, such as getting a field by insertion index, that put it above many (i.e, LuaWiki) implementations.
+
+- Extendable:
+  - VirtualOrderedFields exposes almost every facet of implementation to the user.
+    - As of now, it's restricted to "almost" because the internal tables are hidden. This will change to allow low-level modification.
 
 ## How It Works
-See this [article](https://dev.to/wellinthatcase/new-lua-54-ordered-field-implementation-not-a-linked-list-nor-proxy-table-1ia5-temp-slug-7081040?preview=491d3eb0f22954861537e87991e4aa453e95cdd5c1122e4265e1caf32b6168671329a0193f9150d9b960a0f1f59c15eccb4e5c4bd55051c94bc2b818).
+- VirtualOrderedFields doesn't modify your table at all. 
+  - It only attaches a metatable to handle garbage collection and optionally extend `pairs` functionality.
+- When you add a new key, VirtualOrderedFields _only_ keeps a record of _when_ it was added to an internal structure.
 
 ## Signatures
 - `pkg.orderedtable() -> table`
