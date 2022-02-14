@@ -142,3 +142,92 @@ You may override `__index`, but you'll need to implement method support yourself
 - `function del(t, key)`
   - Deletes an ordered field and its insertion table entries.
   - Returns `false` and `reason` if the key wasn't deleted.
+
+## Performance
+### Insertion Times
+```lua
+local tt = otable.orderedtable()
+local now = os.clock()
+
+for i = 1, 100000 do
+    local k = "key"..tostring(i)
+    local v = "val"..tostring(i)
+
+    tt:add(k, v)
+end
+
+print("Took "..tostring(os.clock() - now).." to insert 100,000 keys.")
+```
+- Results:
+  - ~350ms for 100,000 keys, probably inflated by string computation times.
+
+### Hash Lookup Times
+```lua
+local tt = otable.orderedtable()
+local now = os.clock()
+
+tt:add("key", "value")
+
+for i = 1, 100000 do
+    local v = tt["key"]
+end
+
+print("Took "..tostring(os.clock() - now).." to lookup 100,000 keys.")
+```
+- Results:
+  - ~900ns (0.9ms) for 100,000 keys.
+
+### Key Modification & Reorder Times
+```lua
+local tt = otable.orderedtable()
+local now = os.clock()
+
+tt:add("key", "value")
+
+for i = 1, 100000 do
+    tt:mod("key", "newvalue")
+end
+
+print("Took "..tostring(os.clock() - now).." to modify & reorder 100,000 keys.")
+```
+- Results:
+  - ~250ms for 100,000 keys. This is less than the benchmark for `add`, so string computation definitely added a lot of overhead.
+
+### Traditional Key Modification Times
+```lua
+local tt = otable.orderedtable()
+local now = os.clock()
+
+tt:add("key", "value")
+
+for i = 1, 100000 do
+    tt.key = "newvalue"
+end
+
+print("Took "..tostring(os.clock() - now).." to modify 100,000 keys.")
+```
+- Results:
+  - Typically less than 1 millisecond for 100,000 keys.
+
+### Lookup By Insertion Index Times
+```lua
+local tt = otable.orderedtable()
+
+for i = 1, 10000 do
+    tt:add("key"..tostring(i), "val"..tostring(i))
+end
+
+local now = os.clock()
+
+tt:add("key", "value")
+
+for i = 1, 100000 do
+    local val = tt:getindex(i)
+end
+
+print("Took "..tostring(os.clock() - now).." to index 100,000 keys by their insertion index.")
+```
+- Results:
+  - ~80ms for 100,000 keys.
+
+These benchmarks were performed on an AMD-FX6300 @ 4.1GHz, using 800Mhz dual-channel DDR3 memory. You may see *much* better results on modern hardware.
