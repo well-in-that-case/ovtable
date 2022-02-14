@@ -1,9 +1,9 @@
-# VirtualOrderedFields
+# ovtable
 Performant, friendly, and extendable ordered fields for tables. This implementation retains support for numeric indices and unordered fields in the same table to ensure the most user-friendly experience while providing native performance identical with a normal table.
 
 ## Why you should use this over other implementations?
 - Efficency:
-  - VirtualOrderedFields avoids usage of proxy tables to ensure the highest lookup and insertion performance. Likewise, linked lists are avoided to prevent unneeded hash lookups and seamlessly implement ordered fields in any dynamic environment that may not restrict this table to ordered operations only. You can make any table an ordered table anywhere in your codebase, and behavior will remain identical. Among other design aspects, this makes VirtualOrderedFields faster than every LuaWiki implementation, while boasting superior features.
+  - ovtable avoids usage of proxy tables to ensure the highest lookup and insertion performance. Likewise, linked lists are avoided to prevent unneeded hash lookups and seamlessly implement ordered fields in any dynamic environment that may not restrict this table to ordered operations only. You can make any table an ordered table anywhere in your codebase, and behavior will remain identical. Among other design aspects, this makes VirtualOrderedFields faster than every LuaWiki implementation, while boasting superior features.
 
 - Features & user-friendliness:
   - Direct table behavior isn't modified in any way. You can replace every table in a large codebase, and it'll be compatible.
@@ -11,11 +11,11 @@ Performant, friendly, and extendable ordered fields for tables. This implementat
   - VirtualOrderedFields has some neat functions, such as getting a field by insertion index, that put it above many other implementations.
 
 - Extendable:
-  - VirtualOrderedFields exposes almost every facet of implementation to the user.
+  - ovtable exposes almost every facet of implementation to the user.
     - As of now, it's restricted to "almost" because the internal tables are hidden. This will change to allow low-level modification.
 
 ## How It Works
-- VirtualOrderedFields doesn't modify your table at all. 
+- ovtable doesn't modify your table at all. 
   - It only attaches a metatable to handle garbage collection and optionally extend `pairs` functionality.
 - When you add a new key, VirtualOrderedFields _only_ keeps a record of _when_ it was added to an internal structure.
 
