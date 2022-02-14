@@ -9,6 +9,7 @@ Performant, friendly, and extendable ordered fields for tables. This implementat
   - Direct table behavior isn't modified in any way. You can replace every table in a large codebase, and it'll be compatible.
     - The only change is a metatable which, by default, only modifies garbage collection to clean the internal tables.
   - ovtable has some neat functions, such as getting a field by insertion index, that put it above many other implementations.
+  - ovtable allows you to take full control of the steering wheel using _optional optimizations_, see the end of this readme!
 
 - Extendable:
   - ovtable exposes almost every facet of implementation to the user.
@@ -246,3 +247,19 @@ print("Took "..tostring(os.clock() - now).." to index 100,000 keys by their inse
   - ~80ms for 100,000 keys.
 
 These benchmarks were performed on an AMD-FX6300 @ 4.1GHz, using 800Mhz dual-channel DDR3 memory. You may see *much* better results on modern hardware.
+
+## Optional Optimizations
+- Optional optimizations reduce safety assuming trust from the user. Reducing safety reduces the computation required to execute an ordered operation. `ovtable` features 2 optional optimizations:
+  - `function assertioncalls(boolean)`
+    - This toggles the use of assertion calls in package functions.
+        - This increases benchmark performance ~25% across the board, given you're familiar with what you're doing.
+  - `function set_predef_table_unqid(string)`
+    - This sets a predefined table ID to use inside the package functions, which inherently recalculate it each call.
+        - Using this in combination with disabled assertion calls produces the following changes:
+            - Insertion times are reduced 24% using optional optimizations.
+            - Lookup times are unaffected because they're as fast as possible in Lua 5.4 currently.
+            - Traditional modification times are unaffected for the aforementioned reason.
+            - Modification & reordering is 94.7% faster using optional optimizations.
+            - `getindex` is 120% faster using optional optimizations.
+  
+By using optional optimizations, you're agreeing with yourself that you're knowledgable enough to debug worse error messages, or familiar enough with `ovtable` to avoid errors as a whole. These options are best used in heavy stress environments (i.e, a benchmark) and are more harm than foul when used normally.
