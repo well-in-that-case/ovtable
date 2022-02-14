@@ -1,6 +1,9 @@
 # VirtualOrderedFields
 Performant, friendly, and extendable ordered fields for tables. This implementation retains support for numeric indices and unordered fields in the same table to ensure the most user-friendly experience while providing native performance identical with a normal table.
 
+## Why you should use this over other implementations?
+VirtualOrderedFields avoids usage of proxy tables to ensure the highest lookup and insertion performance. Likewise, linked lists are avoided to seamlessly implement ordered fields in any dynamic environment. You can make any table an ordered table anywhere in your code base, and behavior will remain identical.
+
 ## How It Works
 See this [article](https://dev.to/wellinthatcase/new-lua-54-ordered-field-implementation-not-a-linked-list-nor-proxy-table-1ia5-temp-slug-7081040?preview=491d3eb0f22954861537e87991e4aa453e95cdd5c1122e4265e1caf32b6168671329a0193f9150d9b960a0f1f59c15eccb4e5c4bd55051c94bc2b818).
 
