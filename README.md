@@ -3,12 +3,12 @@ Performant, friendly, and extendable ordered fields for tables. This implementat
 
 ## Why you should use this over other implementations?
 - Efficency:
-  - VirtualOrderedFields avoids usage of proxy tables to ensure the highest lookup and insertion performance. Likewise, linked lists are avoided to prevent unneeded hash lookups and seamlessly implement ordered fields in any dynamic environment that may not restrict this table to ordered operations only. You can make any table an ordered table anywhere in your codebase, and behavior will remain identical.
+  - VirtualOrderedFields avoids usage of proxy tables to ensure the highest lookup and insertion performance. Likewise, linked lists are avoided to prevent unneeded hash lookups and seamlessly implement ordered fields in any dynamic environment that may not restrict this table to ordered operations only. You can make any table an ordered table anywhere in your codebase, and behavior will remain identical. Among other design aspects, this makes VirtualOrderedFields faster than every LuaWiki implementation, while boasting superior features.
 
 - Features & user-friendliness:
   - Direct table behavior isn't modified in any way. You can replace every table in a large codebase, and it'll be compatible.
     - The only change is a metatable which, by default, only modifies garbage collection to clean the internal tables.
-  - VirtualOrderedFields has some neat functions, such as getting a field by insertion index, that put it above many (i.e, LuaWiki) implementations.
+  - VirtualOrderedFields has some neat functions, such as getting a field by insertion index, that put it above many other implementations.
 
 - Extendable:
   - VirtualOrderedFields exposes almost every facet of implementation to the user.
