@@ -1,5 +1,5 @@
 # VirtualOrderedFields
-(Lua 5.4): Virtual ordered fields for tables. Retains support for numeric indices, and unordered fields in the same table. This won't modify your fields at all, because it only keeps track of what keys are inserted at what times when you tell it to.
+Performant, friendly, and extendable ordered fields for tables. This implementation retains support for numeric indices and unordered fields in the same tables to ensure the most user-friendly experience while providing performance identical with a normal table.
 
 ## How It Works
 See this [article](https://dev.to/wellinthatcase/new-lua-54-ordered-field-implementation-not-a-linked-list-nor-proxy-table-1ia5-temp-slug-7081040?preview=491d3eb0f22954861537e87991e4aa453e95cdd5c1122e4265e1caf32b6168671329a0193f9150d9b960a0f1f59c15eccb4e5c4bd55051c94bc2b818).
