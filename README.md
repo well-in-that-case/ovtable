@@ -32,13 +32,13 @@ I'll inline it for now.
 
 Creating a new orderedtable:
 ```lua
-local otable = require "orderedtable"
+local otable = require "ovtable"
 local mytable = otable.orderedtable()
 ```
 
 Adding a new ordered field to your table:
 ```lua
-local otable = require "orderedtable"
+local otable = require "ovtable"
 local mytable = otable.orderedtable()
 
 otable.add(mytable, "key", value)
@@ -46,7 +46,7 @@ otable.add(mytable, "key", value)
 
 Deleting an ordered field from your table:
 ```lua
-local otable = require "orderedtable"
+local otable = require "ovtable"
 local mytable = otable.orderedtable()
 
 otable.del(mytable, "key1", "key2", "key3")
@@ -54,7 +54,7 @@ otable.del(mytable, "key1", "key2", "key3")
 
 Modifying an ordered field from your table:
 ```lua
-local otable = require "orderedtable"
+local otable = require "ovtable"
 local mytable = otable.orderedtable()
 
 otable.mod(mytable, "key", value)
@@ -62,7 +62,7 @@ otable.mod(mytable, "key", value)
 
 Modifying an ordered field without changing the insertion index:
 ```lua
-local otable = require "orderedtable"
+local otable = require "ovtable"
 local mytable = otable.orderedtable()
 
 mytable.key = value
@@ -70,7 +70,7 @@ mytable.key = value
 
 Getting the insertion index of a key:
 ```lua
-local otable = require "orderedtable"
+local otable = require "ovtable"
 local mytable = otable.orderedtable()
 
 otable.add(mytable, "key", "value")
@@ -81,7 +81,7 @@ otable.keyindex(mytable, "key1") --> 2
 
 Getting the value @ an insertion index:
 ```lua
-local otable = require "orderedtable"
+local otable = require "ovtable"
 local mytable = otable.orderedtable()
 
 otable.add(mytable, "key", "value")
@@ -93,7 +93,7 @@ otable.getindex(mytable, 2) --> "value1"
 #### Can I still use numeric indices or normal fields?
 Yes!
 ```lua
-local otable = require "orderedtable"
+local otable = require "ovtable"
 local mytable = otable.orderedtable()
 
 mytable[1] = "hello world"
@@ -110,7 +110,7 @@ Yes! `t:getindex(...)` is equal to `pkg.getindex(t, ...)`.
  
 - If `pairs` was not overridden, then you can use the `orderediterator` function as your iterator:
 ```lua
-local o = require "orderedfields"
+local o = require "ovtable"
 local t = o.orderedtable()
 
 for key, value in t:orderediterator() do
@@ -124,7 +124,7 @@ Use the traditional `t.key = newvalue` syntax.
 #### How can I change the metatable of my ordered table?
 Your boilerplate metatable needs to implement `pkg.orderedmetatable.__gc` and `pkg.orderedmetatable.__index`. See this code:
 ```lua
-local o = require "orderedfields"
+local o = require "ovtable"
 local t = o.orderedtable()
 
 local basemt = o.orderedmetatable
