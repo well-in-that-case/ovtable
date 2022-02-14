@@ -125,3 +125,87 @@ do
 
     print("Took "..tostring(os.clock() - now).." to index 100,000 keys by their insertion index.")
 end
+
+print "Performing benchmarking with optional optimizations..."
+otable.assertioncalls(false)
+
+do
+    local tt = otable.orderedtable()
+    otable.set_predef_table_unqid(otable.generate_unqid(tt))
+
+    local now = os.clock()
+
+    for i = 1, 100000 do
+        local k = "key"..tostring(i)
+        local v = "val"..tostring(i)
+
+        tt:add(k, v)
+    end
+
+    print("Took "..tostring(os.clock() - now).." to insert 100,000 keys.")
+end
+
+do
+    local tt = otable.orderedtable()
+    otable.set_predef_table_unqid(otable.generate_unqid(tt))
+
+    local now = os.clock()
+
+    tt:add("key", "value")
+
+    for i = 1, 100000 do
+        local v = tt["key"]
+    end
+
+    print("Took "..tostring(os.clock() - now).." to lookup 100,000 keys.")
+end
+
+do
+    local tt = otable.orderedtable()
+    otable.set_predef_table_unqid(otable.generate_unqid(tt))
+
+    local now = os.clock()
+
+    tt:add("key", "value")
+
+    for i = 1, 100000 do
+        tt:mod("key", "newvalue")
+    end
+
+    print("Took "..tostring(os.clock() - now).." to modify & reorder 100,000 keys.")
+end
+
+do
+    local tt = otable.orderedtable()
+    otable.set_predef_table_unqid(otable.generate_unqid(tt))
+
+    local now = os.clock()
+
+    tt:add("key", "value")
+
+    for i = 1, 100000 do
+        tt.key = "newvalue"
+    end
+
+    print("Took "..tostring(os.clock() - now).." to modify 100,000 keys.")
+end
+
+do
+    local tt = otable.orderedtable()
+    otable.set_predef_table_unqid(otable.generate_unqid(tt))
+
+    for i = 1, 10000 do
+        tt:add("key"..tostring(i), "val"..tostring(i))
+    end
+
+    local now = os.clock()
+
+    tt:add("key", "value")
+
+    for i = 1, 100000 do
+        local val = tt:getindex(i)
+    end
+
+    print("Took "..tostring(os.clock() - now).." to index 100,000 keys by their insertion index.")
+end
+
