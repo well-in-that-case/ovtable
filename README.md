@@ -261,8 +261,6 @@ These benchmarks were performed on an AMD-FX6300 @ 4.1GHz, using 800Mhz dual-cha
     - This sets a predefined table ID to use inside the package functions, which inherently recalculate it each call.
         - Using this in combination with disabled assertion calls produces the following changes:
             - Insertion times are reduced 24% using optional optimizations.
-            - Lookup times are unaffected because they're as fast as possible in Lua 5.4 currently.
-            - Traditional modification times are unaffected for the aforementioned reason.
             - Modification & reordering is 94.7% faster using optional optimizations.
             - `getindex` is 120% faster using optional optimizations.
   
