@@ -1,7 +1,7 @@
 local otable = require "orderedfields"
 
 do
-    local t = otable.orderedtable(true)
+    local t = otable.orderedtable()
 
     for i = 1, 900 do
         local k, v = "key"..tostring(i), "value"..tostring(i)
@@ -51,4 +51,77 @@ t.key12 = "hello world, again!"
 
 for k, v in t:orderediterator() do
     print(k, v)
+end
+
+print "Performing benchmarking..."
+
+do
+    local tt = otable.orderedtable()
+    local now = os.clock()
+
+    for i = 1, 100000 do
+        local k = "key"..tostring(i)
+        local v = "val"..tostring(i)
+
+        tt:add(k, v)
+    end
+
+    print("Took "..tostring(os.clock() - now).." to insert 100,000 keys.")
+end
+
+do
+    local tt = otable.orderedtable()
+    local now = os.clock()
+
+    tt:add("key", "value")
+
+    for i = 1, 100000 do
+        local v = tt["key"]
+    end
+
+    print("Took "..tostring(os.clock() - now).." to lookup 100,000 keys.")
+end
+
+do
+    local tt = otable.orderedtable()
+    local now = os.clock()
+
+    tt:add("key", "value")
+
+    for i = 1, 100000 do
+        tt:mod("key", "newvalue")
+    end
+
+    print("Took "..tostring(os.clock() - now).." to modify & reorder 100,000 keys.")
+end
+
+do
+    local tt = otable.orderedtable()
+    local now = os.clock()
+
+    tt:add("key", "value")
+
+    for i = 1, 100000 do
+        tt.key = "newvalue"
+    end
+
+    print("Took "..tostring(os.clock() - now).." to modify 100,000 keys.")
+end
+
+do
+    local tt = otable.orderedtable()
+
+    for i = 1, 10000 do
+        tt:add("key"..tostring(i), "val"..tostring(i))
+    end
+
+    local now = os.clock()
+
+    tt:add("key", "value")
+
+    for i = 1, 100000 do
+        local val = tt:getindex(i)
+    end
+
+    print("Took "..tostring(os.clock() - now).." to index 100,000 keys by their insertion index.")
 end
