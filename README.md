@@ -8,7 +8,7 @@ Performant, friendly, and extendable ordered fields for tables. This implementat
 - Features & user-friendliness:
   - Direct table behavior isn't modified in any way. You can replace every table in a large codebase, and it'll be compatible.
     - The only change is a metatable which, by default, only modifies garbage collection to clean the internal tables.
-  - VirtualOrderedFields has some neat functions, such as getting a field by insertion index, that put it above many other implementations.
+  - ovtable has some neat functions, such as getting a field by insertion index, that put it above many other implementations.
 
 - Extendable:
   - ovtable exposes almost every facet of implementation to the user.
@@ -17,7 +17,7 @@ Performant, friendly, and extendable ordered fields for tables. This implementat
 ## How It Works
 - ovtable doesn't modify your table at all. 
   - It only attaches a metatable to handle garbage collection and optionally extend `pairs` functionality.
-- When you add a new key, VirtualOrderedFields _only_ keeps a record of _when_ it was added to an internal structure.
+- When you add a new key, ovtable _only_ keeps a record of _when_ it was added to an internal structure.
 
 ## Signatures
 - `pkg.orderedtable() -> table`
