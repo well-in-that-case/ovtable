@@ -175,7 +175,8 @@ end
 print("Took "..tostring(os.clock() - now).." to insert 100,000 keys.")
 ```
 - Results:
-  - ~350ms for 100,000 keys, probably inflated by string computation times.
+  - ~350ms for 100,000 keys, inflated by string computation times inside of the test.
+  - ~230ms for 100,000 keys using optional optimizations.
 
 ### Hash Lookup Times
 ```lua
@@ -207,7 +208,8 @@ end
 print("Took "..tostring(os.clock() - now).." to modify & reorder 100,000 keys.")
 ```
 - Results:
-  - ~250ms for 100,000 keys. This is less than the benchmark for `add`, so string computation definitely added a lot of overhead.
+  - ~250ms for 100,000 keys.
+  - ~101ms for 100,000 keys using optional optimizations.
 
 ### Traditional Key Modification Times
 ```lua
@@ -245,6 +247,7 @@ print("Took "..tostring(os.clock() - now).." to index 100,000 keys by their inse
 ```
 - Results:
   - ~80ms for 100,000 keys.
+  - ~18ms for 100,000 keys using optional optimizations.
 
 These benchmarks were performed on an AMD-FX6300 @ 4.1GHz, using 800Mhz dual-channel DDR3 memory. You may see *much* better results on modern hardware.
 
