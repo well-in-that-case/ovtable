@@ -1,6 +1,9 @@
 # ovtable
 Performant, friendly, and extendable ordered fields for tables. This implementation retains support for numeric indices and unordered fields in the same table to ensure the most user-friendly experience while providing native performance identical with a normal table.
 
+## How to use?
+ovtable will be on LuaRocks soon. Until then, simply download, drag, and drop the `ovtable.lua` file.
+
 ## Why you should use this over other implementations?
 - Efficency:
   - ovtable avoids usage of proxy tables to ensure the highest lookup and insertion performance. Likewise, linked lists are avoided to prevent unneeded hash lookups and seamlessly implement ordered fields in any dynamic environment that may not restrict this table to ordered operations only. You can make any table an ordered table anywhere in your codebase, and behavior will remain identical. Among other design aspects, this makes ovtable faster than every LuaWiki implementation, while boasting superior features.
