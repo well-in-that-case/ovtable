@@ -2,7 +2,7 @@
 Performant, friendly, and extendable ordered fields for tables. This implementation retains support for numeric indices and unordered fields in the same table to ensure the most user-friendly experience while providing native performance identical with a normal table.
 
 ## How to use?
-Simply download, drag, and drop the `ovtable.lua` file. Alternatively, use Luarocks:
+Simply download, drag, and drop the `ovtable.lua` file. Alternatively, use [Luarocks](https://luarocks.org/modules/well-in-that-case/ovtable):
 ```
 luarocks install --server=https://luarocks.org/dev ovtable
 ```
