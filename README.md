@@ -28,6 +28,7 @@ luarocks install --server=https://luarocks.org/dev ovtable
 
 ## Signatures
 - `pkg.orderedtable() -> table`
+- `pkg.orderediterator() -> function`
 - `pkg.add(table, string, any) -> boolean`
 - `pkg.mod(table, string, any) -> boolean`
 - `pkg.del(table, string) -> boolean, (false, string)`
