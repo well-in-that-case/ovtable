@@ -21,8 +21,7 @@ Lua >= 5.2.
   - ovtable allows you to take full control of the steering wheel using _optional optimizations_, see the end of this readme!
 
 - Extendable:
-  - ovtable exposes almost every facet of implementation to the user.
-    - As of now, it's restricted to "almost" because the internal tables are hidden. This will change to allow low-level modification.
+  - ovtable is absurdly simple and allows you to do pretty much anything you want to your table.
 - Slowly becoming time-tested:
   - ovtable is gaining almost over 2,000 downloads every day on Luarocks without a single issue reported.
 
