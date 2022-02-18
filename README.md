@@ -23,7 +23,7 @@ Lua >= 5.2.
 - Extendable:
   - ovtable is absurdly simple and allows you to do pretty much anything you want to your table.
 - Slowly becoming time-tested:
-  - ovtable is gaining almost over 2,000 downloads every day on Luarocks without a single issue reported.
+  - ovtable is gaining nearly 2,000 downloads every day on Luarocks without a single issue reported.
 
 ## How It Works
 - ovtable doesn't modify your table at all. 
