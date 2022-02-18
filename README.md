@@ -7,6 +7,9 @@ Simply download, drag, and drop the `ovtable.lua` file. Alternatively, use [Luar
 luarocks install --server=https://luarocks.org/dev ovtable
 ```
 
+## Compatibility
+Lua >= 5.2.
+
 ## Why you should use this over other implementations?
 - Efficency:
   - ovtable avoids usage of proxy tables to ensure the highest lookup and insertion performance. Likewise, linked lists are avoided to prevent unneeded hash lookups and seamlessly implement ordered fields in any dynamic environment that may not restrict this table to ordered operations only. You can make any table an ordered table anywhere in your codebase, and behavior will remain identical. Among other design aspects, this makes ovtable faster than every LuaWiki implementation, while boasting superior features.
