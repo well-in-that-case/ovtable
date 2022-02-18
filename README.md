@@ -26,7 +26,7 @@ Lua >= 5.2.
 
 ## How It Works
 - ovtable doesn't modify your table at all. 
-  - It only attaches a metatable to handle garbage collection and optionally extend `pairs` functionality.
+  - It only attaches a metatable to handle garbage collection, optionally extend `pairs` functionality, and add method support with `__index`.
 - When you add a new key, ovtable _only_ keeps a record of _when_ it was added to an internal structure.
 
 ## Signatures
