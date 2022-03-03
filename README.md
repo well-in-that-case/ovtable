@@ -1,11 +1,14 @@
 # ovtable
-Performant, friendly, and extendable ordered fields for tables. This implementation retains support for numeric indices and unordered fields in the same table to ensure the most user-friendly experience while providing native performance identical with a normal table.
+Fast, friendly, and dynamic ordered table support for your codebase.
 
 ## How to use?
 Simply download, drag, and drop the `ovtable.lua` file. Alternatively, use [Luarocks](https://luarocks.org/modules/well-in-that-case/ovtable):
 ```
 luarocks install --server=https://luarocks.org/dev ovtable
 ```
+
+## Documentation
+Visit the [reference.](https://well-in-that-case.github.io/ovtable/)
 
 ## Compatibility
 Lua >= 5.2.
@@ -29,78 +32,6 @@ Lua >= 5.2.
 - ovtable doesn't modify your table at all. 
   - It only attaches a metatable to handle garbage collection, optionally extend `pairs` functionality, and add method support with `__index`.
 - When you add a new key, ovtable _only_ keeps a record of _when_ it was added to an internal structure.
-
-## Signatures
-- `pkg.orderedtable() -> table`
-- `pkg.orderediterator() -> function`
-- `pkg.add(table, string, any) -> boolean`
-- `pkg.mod(table, string, any) -> boolean`
-- `pkg.del(table, string) -> boolean, (false, string)`
-- `pkg.getindex(table, number, boolean) -> any, (string, string), (nil, string)`
-- `pkg.keyindex(table, string) -> number, (nil, string)`
-
-## Examples
-I'll inline it for now.
-
-Creating a new orderedtable:
-```lua
-local otable = require "ovtable"
-local mytable = otable.orderedtable()
-```
-
-Adding a new ordered field to your table:
-```lua
-local otable = require "ovtable"
-local mytable = otable.orderedtable()
-
-otable.add(mytable, "key", value)
-```
-
-Deleting an ordered field from your table:
-```lua
-local otable = require "ovtable"
-local mytable = otable.orderedtable()
-
-otable.del(mytable, "key1", "key2", "key3")
-```
-
-Modifying an ordered field from your table:
-```lua
-local otable = require "ovtable"
-local mytable = otable.orderedtable()
-
-otable.mod(mytable, "key", value)
-```
-
-Modifying an ordered field without changing the insertion index:
-```lua
-local otable = require "ovtable"
-local mytable = otable.orderedtable()
-
-mytable.key = value
-```
-
-Getting the insertion index of a key:
-```lua
-local otable = require "ovtable"
-local mytable = otable.orderedtable()
-
-otable.add(mytable, "key", "value")
-otable.add(mytable, "key1", "value1")
-
-otable.keyindex(mytable, "key1") --> 2
-```
-
-Getting the value @ an insertion index:
-```lua
-local otable = require "ovtable"
-local mytable = otable.orderedtable()
-
-otable.add(mytable, "key", "value")
-otable.add(mytable, "key1", "value1")
-
-otable.getindex(mytable, 2) --> "value1"
-```
 
 #### Can I still use numeric indices or normal fields?
 Yes!
@@ -146,29 +77,6 @@ setmetatable(t, basemt)
 ```
 If you fail to set `__gc` as `orderedmetatable.__gc`, then your memory will leak, because L1 & L2 table cleanup won't invoke.
 You may override `__index`, but you'll need to implement method support yourself when you do that. It points to the package table by default.
-
-## Documentation
-- `function orderedtable(override_pairs)`
-  - Returns a new ordered table, which can optionally change `pairs` to an ordered iterator when used on ordered tables.
-- `function orderediterator(t)`
-  - Returns an iterator that appropriately loops over ordered fields.
-- `function getindex(t, idx, give_key_name)` 
-  - Gets the field's value by insertion index (`idx`). `give_key_name = true` will return the key name and key value.
-  - Returns `key_value` inherently.
-  - Returns `nil` and `reason` if the search fails.
-  - Returns `key_name` and `key_value` if `give_key_name` is set as `true`.
-- `function keyindex(t, key`)
-  - Returns the numeric insertion index of `key` in `t`.
-  - Returns `nil` and `reason` if the search fails.
-- `function add(t, key, value)`
-  - Adds a new ordered field to `t` with the respective parameters.
-  - Returns a boolean indicating if the key was added.
-- `function mod(t, key, value)`
-  - Modifies an ordered field by calling `del` and `add` in succession. This is how you reorder on modification.
-  - Returns the combined result of `mod` and `add`.
-- `function del(t, key)`
-  - Deletes an ordered field and its insertion table entries.
-  - Returns `false` and `reason` if the key wasn't deleted.
 
 ## Performance
 ### Insertion Times
