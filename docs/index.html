@@ -1,294 +1,469 @@
---- Fast, friendly, and dynamic ordered table support for your codebase.
--- Ordered tables from this package work like any other table.
--- Whether you want to use unordered keys, ordered ones, or even numeric indices. It all works fine.
--- That's stellar compatibility, and it's zero-overhead when you're doing native operations.
---
--- Need to report an issue?
--- https://github.com/well-in-that-case/ovtable/issues
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Reference</title>
+    <link rel="stylesheet" href="ldoc.css" type="text/css" />
+</head>
+<body>
 
---[[
-MIT License
+<div id="container">
 
-Copyright (c) 2022 Ryan Starrett
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+<div id="main">
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
---]]
 
--- Lua 5.4 Virtual Ordered Field Implementation.
+<!-- Menu -->
 
---[[
-    Feature Implementation:
-        "Virtual", meaning tables aren't directly modified. Everything is tracked externally.
-        As a result, this is the fastest implementation. Two internal tables are used to track data,
-        and they're named the L1 and L2 tables, respectively.
+<div id="navigation">
+<br/>
+<h1>ldoc</h1>
 
-        The L1 table maps index to key pairs, where 'index' represents the insertion index.
-        The L1 table is a plain numeric indice array that's garbage collected appropriately.
-        The L2 table maps key to index pairs, where 'index' and 'key' are alike to aforementioned.
 
-        This design choice gives ovtable unrivaled lookup and assignment performance.
-        Proxy-table implementations are destructive to codebase compatibility and have high assignment/lookup overhead.
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+<li><a href="#Fields">Fields</a></li>
+</ul>
 
-        ovtable has a fair amount in common with linked list implementations, but we link against numeric nodes
-        that virtually represent an index, instead of a tangible key. This method works like oil between gears.
 
-        A substantial advantage of external tracking is compatibility though.
-        Unordered and ordered keys, including numeric indices are legal to store in ordered tables.
-        It's important to understand, your ordered table is literally just a table. Ovtable only remembers some stuff.
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><strong>ovtable</strong></li>
+</ul>
 
-    Need-To-Knows:
-        If you wish to replace the metatable of your ordered table, it must implement `orderedmetatable.__gc`.
-        Additionally, it must implement `__index = pkg` (pkg = ovtable.lua) for method syntax support.
---]]
+</div>
 
-local pkg = {} -- Main package.
-local use_assert = true
+<div id="content">
 
-local L1_indexkey = setmetatable({}, { __mode = "k" }) -- L1
-local L2_keyindex = setmetatable({}, { __mode = "k" }) -- L2
+<h1>Module <code>ovtable</code></h1>
+<p>Fast, friendly, and dynamic ordered table support for your codebase.</p>
+<p>
+ Ordered tables from this package work like any other table.
+ Whether you want to use unordered keys, ordered ones, or even numeric indices. It all works fine.
+ That's stellar compatibility, and it's zero-overhead when you're doing native operations.
+<p> Need to report an issue?
+ https://github.com/well-in-that-case/ovtable/issues</p>
 
---[[
-    Metatable used to implement ordered tables. Stored in a local for identification purposes.
---]]
-local orderedmetatable = {
-    __pairs = function (t)
-        local idx = 1
 
-        local L1 = L1_indexkey[t]
-        local L2 = L2_keyindex[t]
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#pkg.orderedtable">pkg.orderedtable (override_pairs)</a></td>
+	<td class="summary">Returns a new orderedtable.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#pkg.orderediterator">pkg.orderediterator (...)</a></td>
+	<td class="summary">Returns an iterator for ordered fields.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#pkg.add">pkg.add (t, key, value, raw)</a></td>
+	<td class="summary">Performs t[key] = value & updates the insertion table accordingly.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#pkg.mod">pkg.mod (t, key, value)</a></td>
+	<td class="summary">Modify and reorder this key.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#pkg.del">pkg.del (t, ...)</a></td>
+	<td class="summary">Deletes and removes the insertion table entries for the keys you pass.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#pkg.getindex">pkg.getindex (t, idx, give_key_name)</a></td>
+	<td class="summary">Gets an ordered field's value by its insertion index.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#pkg.keyindex">pkg.keyindex (t, key)</a></td>
+	<td class="summary">Returns the insertion index of the key.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#pkg.orderedlen">pkg.orderedlen (t)</a></td>
+	<td class="summary">Returns the amount of ordered keys in this ordered table.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#pkg.assertioncalls">pkg.assertioncalls (state)</a></td>
+	<td class="summary">Whether or not to use assertion calls in these package's functions.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#pkg.get_l1">pkg.get_l1 ()</a></td>
+	<td class="summary">Fetch the internal L1 table.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#pkg.get_l2">pkg.get_l2 ()</a></td>
+	<td class="summary">Fetch the internal L2 table.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#pkg.set_predef_table_unqid">pkg.set_predef_table_unqid (...)</a></td>
+	<td class="summary">Sets a predefined table identifier.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#pkg.generate_unqid">pkg.generate_unqid (...)</a></td>
+	<td class="summary">Returns the unique ID for this table.</td>
+	</tr>
+</table>
+<h2><a href="#Fields">Fields</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#pkg.orderedmetatable">pkg.orderedmetatable</a></td>
+	<td class="summary">This is your base metatable when you wish to create overrides.</td>
+	</tr>
+</table>
 
-        if not L1 or not L2 then
-            return nil, "internal tables are empty."
-        end
+<br/>
+<br/>
 
-        return function ()
-            local k = L1[idx]
-            local v = t[k]
 
-            while v == nil and idx <= #L1 do
-                idx = idx + 1
+    <h2 class="section-header "><a name="Functions"></a>Functions</h2>
 
-                k = L1[idx]
-                v = t[k]
-            end
+    <dl class="function">
+    <dt>
+    <a name = "pkg.orderedtable"></a>
+    <strong>pkg.orderedtable (override_pairs)</strong>
+    </dt>
+    <dd>
+    Returns a new orderedtable.  Optionally override the __pairs metamethod.
 
-            idx = idx + 1
 
-            return k, v
-        end
-    end,
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">override_pairs</span>
+         A boolean indicating whether to overrride the __pairs metamethod.
+        </li>
+    </ul>
 
-    __gc = function (t)
-        L1_indexkey[t] = nil
-        L2_keyindex[t] = nil
-    end,
 
-    __index = pkg
-}
 
---- This is your base metatable when you wish to create overrides.
--- It needs __gc to garbage collect the internal tables and it needs __index for method support.
-pkg.orderedmetatable = orderedmetatable
 
---- Returns a new orderedtable. Optionally override the __pairs metamethod.
--- @param override_pairs A boolean indicating whether to overrride the __pairs metamethod.
-function pkg.orderedtable(override_pairs)
-    if override_pairs == true then
-        return setmetatable({}, orderedmetatable)
-    else
-        return setmetatable({}, { __gc = orderedmetatable.__gc, __index = orderedmetatable.__index })
-    end
-end
 
---- Returns an iterator for ordered fields. If you set override_pairs as true, this is the same as pairs.
--- This function takes the same parameters you'd give to __pairs.
-function pkg.orderediterator(...)
-    return orderedmetatable.__pairs(...)
-end
+</dd>
+    <dt>
+    <a name = "pkg.orderediterator"></a>
+    <strong>pkg.orderediterator (...)</strong>
+    </dt>
+    <dd>
+    Returns an iterator for ordered fields.  If you set override_pairs as true, this is the same as pairs.
+ This function takes the same parameters you'd give to __pairs.
 
---- Performs t[key] = value & updates the insertion table accordingly.
--- This is the only way to make an ordered key.
--- @param t The ordered table.
--- @param key The key to use.
--- @param value The value to use.
--- @param raw A boolean indicating whether to use raw assignment (via rawset) or __newindex assignment.
--- @return A boolean indicating if the key was added successfully.
-function pkg.add(t, key, value, raw)
-    if use_assert == true then
-        assert(type(key) == "string", "key must be a string.")
-        assert(value ~= nil, "value must not be nil. Use the del function to remove elements.")
-        assert(getmetatable(t).__gc == orderedmetatable.__gc, "t must be an orderedtable.")
-    end
 
-    if not L1_indexkey[t] then
-        L1_indexkey[t] = {}
-    end
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">...</span>
 
-    local idx = #L1_indexkey[t] + 1
+        </li>
+    </ul>
 
-    L1_indexkey[t][idx] = key
 
-    if not L2_keyindex[t] then
-        L2_keyindex[t] = {}
-    end
 
-    L2_keyindex[t][key] = idx
 
-    if raw ~= true then
-        t[key] = value
-    else
-        rawset(t, key, value)
-    end
 
-    return t[key] ~= nil
-end
+</dd>
+    <dt>
+    <a name = "pkg.add"></a>
+    <strong>pkg.add (t, key, value, raw)</strong>
+    </dt>
+    <dd>
+    Performs t[key] = value & updates the insertion table accordingly.
+ This is the only way to make an ordered key.
 
---- Modify and reorder this key.
--- Use traditional reassignment if you do not wish to reorder.
--- @param t The ordered table.
--- @param key The key to modify.
--- @param value The new value for this key.
-function pkg.mod(t, key, value)
-    if use_assert == true then
-        assert(getmetatable(t).__gc == orderedmetatable.__gc, "t must be an orderedtable.")
-        assert(type(key) == "string", "key must be a string.")
-    end
 
-    return pkg.del(t, key) and pkg.add(t, key, value, true)
-end
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">t</span>
+         The ordered table.
+        </li>
+        <li><span class="parameter">key</span>
+         The key to use.
+        </li>
+        <li><span class="parameter">value</span>
+         The value to use.
+        </li>
+        <li><span class="parameter">raw</span>
+         A boolean indicating whether to use raw assignment (via rawset) or __newindex assignment.
+        </li>
+    </ul>
 
---- Deletes and removes the insertion table entries for the keys you pass.
--- This function takes an indefinite amount of string arguments. It uses raw assignment to nil values.
--- @param t The ordered table.
--- @param ... The keys you wish to delete.
--- @return Returns the amount of keys deleted.
-function pkg.del(t, ...)
-    if use_assert then
-        assert(getmetatable(t).__gc == orderedmetatable.__gc, "t must be an orderedtable.")
-    end
+    <h3>Returns:</h3>
+    <ol>
 
-    local L1 = L1_indexkey[t]
-    local L2 = L2_keyindex[t]
+        A boolean indicating if the key was added successfully.
+    </ol>
 
-    if not L1 or not L2 then
-        return false
-    end
 
-    local rem = table.remove
-    local raw = rawset
-    local tbl = {...}
-    local amt = 0
 
-    for i = 1, #tbl do
-        local key = tbl[i]
-        local idx = L1[key]
 
-        if idx then
-            rem(L1_indexkey[t], idx)
+</dd>
+    <dt>
+    <a name = "pkg.mod"></a>
+    <strong>pkg.mod (t, key, value)</strong>
+    </dt>
+    <dd>
+    Modify and reorder this key.
+ Use traditional reassignment if you do not wish to reorder.
 
-            L2_keyindex[t][key] = nil
-            raw(t, key, nil)
 
-            amt = amt + 1
-        end
-    end
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">t</span>
+         The ordered table.
+        </li>
+        <li><span class="parameter">key</span>
+         The key to modify.
+        </li>
+        <li><span class="parameter">value</span>
+         The new value for this key.
+        </li>
+    </ul>
 
-    return amt
-end
 
---- Gets an ordered field's value by its insertion index.
--- @param t The ordered table.
--- @param idx The numeric index to read.
--- @param give_key_name A boolean indicating whether to also return the key's name.
--- @return The key's value or the key's name and value, respectively.
-function pkg.getindex(t, idx, give_key_name)
-    if use_assert == true then
-        assert(type(idx) == "number", "idx must be a number.")
-        assert(getmetatable(t).__gc == orderedmetatable.__gc, "t must be an orderedtable.")
-    end
 
-    local kstr = L1_indexkey[t]
 
-    if not kstr then
-        return nil, "this table has no keys"
-    else
-        local k = kstr[idx]
 
-        if give_key_name == true then
-            return k, t[k]
-        else
-            return t[k]
-        end
-    end
-end
+</dd>
+    <dt>
+    <a name = "pkg.del"></a>
+    <strong>pkg.del (t, ...)</strong>
+    </dt>
+    <dd>
+    Deletes and removes the insertion table entries for the keys you pass.
+ This function takes an indefinite amount of string arguments. It uses raw assignment to nil values.
 
---- Returns the insertion index of the key.
--- @param t The ordered table.
--- @param key The key to read.
--- @return The key's insertion index (number), or nil if it wasn't found.
-function pkg.keyindex(t, key)
-    if use_assert == true then
-        assert(type(key) == "string", "key must be a string.")
-        assert(getmetatable(t).__gc == orderedmetatable.__gc, "t must be an orderedtable.")
-    end
 
-    local kstr = L2_keyindex[t]
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">t</span>
+         The ordered table.
+        </li>
+        <li><span class="parameter">...</span>
+         The keys you wish to delete.
+        </li>
+    </ul>
 
-    if not kstr then
-        return nil
-    else
-        return kstr[key]
-    end
-end
+    <h3>Returns:</h3>
+    <ol>
 
---- Returns the amount of ordered keys in this ordered table.
--- @param t The ordered table.
--- @return The amount of ordered keys, or nil if this table isn't an ordered table.
-function pkg.orderedlen(t)
-    local entry = L1_indexkey[t]
+        Returns the amount of keys deleted.
+    </ol>
 
-    if entry == nil then
-        return nil
-    else
-        return #entry
-    end
-end
 
---- Whether or not to use assertion calls in these package's functions.
--- Assertion calls can add upwards of 30% overhead during heavy stress.
--- There's no reason to keep using assertion calls if your code is stable & you're familiar with ovtable.
--- @param state A boolean indicating whether to use assertion calls.
--- @return This function has no return.
-function pkg.assertioncalls(state)
-    use_assert = state
-end
 
---- Fetch the internal L1 table. Useful for debugging and issue reporting.
-function pkg.get_l1() return L1_indexkey end
---- Fetch the internal L2 table. Useful for debugging and issue reporting.
-function pkg.get_l2() return L2_keyindex end
 
---- Sets a predefined table identifier.
--- Deprecated; first-class table references are used instead of strings now.
-function pkg.set_predef_table_unqid(...) return "a" end
---- Returns the unique ID for this table.
--- Deprecated; first-class table references are used instead of strings now.
-function pkg.generate_unqid(...) end
+</dd>
+    <dt>
+    <a name = "pkg.getindex"></a>
+    <strong>pkg.getindex (t, idx, give_key_name)</strong>
+    </dt>
+    <dd>
+    Gets an ordered field's value by its insertion index.
 
-return pkg
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">t</span>
+         The ordered table.
+        </li>
+        <li><span class="parameter">idx</span>
+         The numeric index to read.
+        </li>
+        <li><span class="parameter">give_key_name</span>
+         A boolean indicating whether to also return the key's name.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        The key's value or the key's name and value, respectively.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "pkg.keyindex"></a>
+    <strong>pkg.keyindex (t, key)</strong>
+    </dt>
+    <dd>
+    Returns the insertion index of the key.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">t</span>
+         The ordered table.
+        </li>
+        <li><span class="parameter">key</span>
+         The key to read.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        The key's insertion index (number), or nil if it wasn't found.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "pkg.orderedlen"></a>
+    <strong>pkg.orderedlen (t)</strong>
+    </dt>
+    <dd>
+    Returns the amount of ordered keys in this ordered table.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">t</span>
+         The ordered table.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        The amount of ordered keys, or nil if this table isn't an ordered table.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "pkg.assertioncalls"></a>
+    <strong>pkg.assertioncalls (state)</strong>
+    </dt>
+    <dd>
+    Whether or not to use assertion calls in these package's functions.
+ Assertion calls can add upwards of 30% overhead during heavy stress.
+ There's no reason to keep using assertion calls if your code is stable & you're familiar with ovtable.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">state</span>
+         A boolean indicating whether to use assertion calls.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        This function has no return.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "pkg.get_l1"></a>
+    <strong>pkg.get_l1 ()</strong>
+    </dt>
+    <dd>
+    Fetch the internal L1 table.  Useful for debugging and issue reporting.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "pkg.get_l2"></a>
+    <strong>pkg.get_l2 ()</strong>
+    </dt>
+    <dd>
+    Fetch the internal L2 table.  Useful for debugging and issue reporting.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "pkg.set_predef_table_unqid"></a>
+    <strong>pkg.set_predef_table_unqid (...)</strong>
+    </dt>
+    <dd>
+    Sets a predefined table identifier.
+ Deprecated; first-class table references are used instead of strings now.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">...</span>
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "pkg.generate_unqid"></a>
+    <strong>pkg.generate_unqid (...)</strong>
+    </dt>
+    <dd>
+    Returns the unique ID for this table.
+ Deprecated; first-class table references are used instead of strings now.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">...</span>
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Fields"></a>Fields</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "pkg.orderedmetatable"></a>
+    <strong>pkg.orderedmetatable</strong>
+    </dt>
+    <dd>
+    This is your base metatable when you wish to create overrides.
+ It needs __gc to garbage collect the internal tables and it needs __index for method support.
+
+
+
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
+<i style="float:right;">Last updated 2022-03-03 09:55:48 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>
