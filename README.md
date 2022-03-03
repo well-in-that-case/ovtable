@@ -19,9 +19,8 @@ Lua >= 5.2.
 
 - Features & user-friendliness:
   - Direct table behavior isn't modified in any way. You can replace every table in a large codebase, and it'll be compatible.
-    - The only change is a metatable which, by default, only modifies garbage collection to clean the internal tables.
-  - ovtable has some neat functions, such as getting a field by insertion index, that put it above many other implementations.
-  - ovtable allows you to take full control of the steering wheel using _optional optimizations_, see the end of this readme!
+    - The only change is a metatable which, by default, only modifies garbage collection to clean the internal tables & support universal method usage.
+  - I enjoy neat QoL features inside packages that I use, so you can expect those here as well.
 
 - Extendable:
   - ovtable is absurdly simple and allows you to do pretty much anything you want to your table.
