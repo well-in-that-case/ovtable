@@ -174,13 +174,6 @@ These benchmarks were performed on an AMD-FX6300 @ 4.1GHz, using 800Mhz dual-cha
   - `function assertioncalls(boolean)`
     - This toggles the use of assertion calls in package functions.
         - This increases benchmark performance ~25% across the board, given you're familiar with what you're doing.
-  - `function set_predef_table_unqid(string)`
-    - Passing nil will toggle this feature off, otherwise, pass `pkg.generate_unqid(table)`.
-    - This sets a predefined table ID to use inside the package functions, which inherently recalculate it each call.
-        - Using this in combination with disabled assertion calls produces the following changes:
-            - Insertion times are reduced 24% using optional optimizations.
-            - Modification & reordering is 94.7% faster using optional optimizations.
-            - `getindex` is 120% faster using optional optimizations.
   
 By using optional optimizations, you're agreeing with yourself that you're knowledgable enough to debug worse error messages, or familiar enough with `ovtable` to avoid errors as a whole. These options are best used in heavy stress environments (i.e, a benchmark) and are more harm than foul when used normally.
 
