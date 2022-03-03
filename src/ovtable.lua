@@ -1,3 +1,8 @@
+--- Fast, friendly, and dynamic ordered table support for your codebase.
+-- Ordered tables from this package work like any other table.
+-- Whether you want to use unordered keys, ordered ones, or even numeric indices. It all works fine.
+-- That's stellar compatibility, and it's zero-overhead when you're doing native operations.
+
 --[[
 MIT License
 
@@ -22,42 +27,38 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 --]]
 
--- Lua 5.4 Virtual Ordered Field Implementation, backwards-compatibility untested.
+-- Lua 5.4 Virtual Ordered Field Implementation.
 
 --[[
     Feature Implementation:
-        - This ordered field implementation calls itself virtual because it doesn't modify anything.
-        - A basic internal table is created to track insertion order. Each orderedtable creates a subtable.
-        - Each subtable is referred to by its memory address, as a unique identifier.
-        - The subtables contain index -> key pairs which indirectly map the insertion order.
-        - The mirror subtable contains key -> index pairs which indirectly map the insertion order.
-        - The purpose of the mirror table is to fetch insertion order by key in O(1).
+        "Virtual", meaning tables aren't directly modified. Everything is tracked externally.
+        As a result, this is the fastest implementation. Two internal tables are used to track data,
+        and they're named the L1 and L2 tables, respectively.
 
-        - Setting a key to nil won't reorder the insertion table, but it will by skipped by __pairs.
-        - If you want to correctly abolish an ordered field, use the `del` function. It's O(n); n = #table - 1.
+        The L1 table maps index to key pairs, where 'index' represents the insertion index.
+        The L1 table is a plain numeric indice array that's garbage collected appropriately.
+        The L2 table maps key to index pairs, where 'index' and 'key' are alike to aforementioned.
 
-        - Numeric indices aren't supported. They're already ordered.
-        - Adding them to the table works fine, I just don't interact with them.
+        This design choice gives ovtable unrivaled lookup and assignment performance.
+        Proxy-table implementations are destructive to codebase compatibility and have high assignment/lookup overhead.
 
-        - Manually adding fields doesn't order them. I also just ignore them, so you can mix your table up.
-        - Careful with the ignore though, because pairs won't show your elements. They're still there however.
+        ovtable has a fair amount in common with linked list implementations, but we link against numeric nodes
+        that virtually represent an index, instead of a tangible key. This method works like oil between gears.
+
+        A substantial advantage of external tracking is compatibility though.
+        Unordered and ordered keys, including numeric indices are legal to store in ordered tables.
+        It's important to understand, your ordered table is literally just a table. Ovtable only remembers some stuff.
+
+    Need-To-Knows:
+        If you wish to replace the metatable of your ordered table, it must implement `orderedmetatable.__gc`.
+        Additionally, it must implement `__index = pkg` (pkg = ovtable.lua) for method syntax support.
 --]]
 
 local pkg = {} -- Main package.
-local ins_order = {} -- Tracks insertion order; L1 table.
-local key_ins_order = {} -- Mirror of `ins_order` to fetch the order of the key by its name; L2 table.
+local use_assert = true
 
-local ssub,
-      type,
-      rawset,
-      assert,
-      tremove,
-      tostring,
-      setmetatable,
-      getmetatable = string.sub, type, rawset, assert, table.remove, tostring, setmetatable, getmetatable
-
-local use_assertioncalls = true
-local predef_table_unqid = nil
+local L1_indexkey = setmetatable({}, { __mode = "k" }) -- L1
+local L2_keyindex = setmetatable({}, { __mode = "k" }) -- L2
 
 --[[
     Metatable used to implement ordered tables. Stored in a local for identification purposes.
@@ -65,10 +66,9 @@ local predef_table_unqid = nil
 local orderedmetatable = {
     __pairs = function (t)
         local idx = 1
-        local id = ssub(tostring(t), 8)
 
-        local L1 = ins_order[id]
-        local L2 = key_ins_order[id]
+        local L1 = L1_indexkey[t]
+        local L2 = L2_keyindex[t]
 
         if not L1 or not L2 then
             return nil, "internal tables are empty."
@@ -92,23 +92,19 @@ local orderedmetatable = {
     end,
 
     __gc = function (t)
-        local id = ssub(tostring(t), 8)
-
-        if ins_order[id] then
-            ins_order[id] = nil
-        end
-
-        if key_ins_order[id] then
-            key_ins_order[id] = nil
-        end
+        L1_indexkey[t] = nil
+        L2_keyindex[t] = nil
     end,
 
     __index = pkg
 }
 
+--- This is your base metatable when you wish to create overrides.
+-- It needs __gc to garbage collect the internal tables and it needs __index for method support.
 pkg.orderedmetatable = orderedmetatable
 
--- Returns a new orderedtable. Optionally override the `__pairs` metamethod.
+--- Returns a new orderedtable. Optionally override the __pairs metamethod.
+-- @param override_pairs A boolean indicating whether to overrride the __pairs metamethod.
 function pkg.orderedtable(override_pairs)
     if override_pairs == true then
         return setmetatable({}, orderedmetatable)
@@ -117,43 +113,56 @@ function pkg.orderedtable(override_pairs)
     end
 end
 
--- Returns an iterator for ordered fields. If you set `override_pairs` as true, this is the same as `pairs`.
+--- Returns an iterator for ordered fields. If you set override_pairs as true, this is the same as pairs.
+-- This function takes the same parameters you'd give to __pairs.
 function pkg.orderediterator(...)
     return orderedmetatable.__pairs(...)
 end
 
--- Performs t[key] = value & updates the insertion table accordingly.
-function pkg.add(t, key, value)
-    if use_assertioncalls == true then
+--- Performs t[key] = value & updates the insertion table accordingly.
+-- This is the only way to make an ordered key.
+-- @param t The ordered table.
+-- @param key The key to use.
+-- @param value The value to use.
+-- @param raw A boolean indicating whether to use raw assignment (via rawset) or __newindex assignment.
+-- @return A boolean indicating if the key was added successfully.
+function pkg.add(t, key, value, raw)
+    if use_assert == true then
         assert(type(key) == "string", "key must be a string.")
         assert(value ~= nil, "value must not be nil. Use the del function to remove elements.")
         assert(getmetatable(t).__gc == orderedmetatable.__gc, "t must be an orderedtable.")
     end
 
-    local id = predef_table_unqid or ssub(tostring(t), 8)
-
-    if not ins_order[id] then
-        ins_order[id] = {}
+    if not L1_indexkey[t] then
+        L1_indexkey[t] = {}
     end
 
-    local idx = #ins_order[id] + 1
+    local idx = #L1_indexkey[t] + 1
 
-    ins_order[id][idx] = key
+    L1_indexkey[t][idx] = key
 
-    if not key_ins_order[id] then
-        key_ins_order[id] = {}
+    if not L2_keyindex[t] then
+        L2_keyindex[t] = {}
     end
 
-    key_ins_order[id][key] = idx
+    L2_keyindex[t][key] = idx
 
-    t[key] = value
+    if raw ~= true then
+        t[key] = value
+    else
+        rawset(t, key, value)
+    end
 
     return t[key] ~= nil
 end
 
--- Syntactic sugar for calling `del` and `add` in succession. Use this over `t[k] = v` when you want to reorder `k`.
+--- Modify and reorder this key.
+-- Use traditional reassignment if you do not wish to reorder.
+-- @param t The ordered table.
+-- @param key The key to modify.
+-- @param value The new value for this key.
 function pkg.mod(t, key, value)
-    if use_assertioncalls == true then
+    if use_assert == true then
         assert(getmetatable(t).__gc == orderedmetatable.__gc, "t must be an orderedtable.")
         assert(type(key) == "string", "key must be a string.")
     end
@@ -161,44 +170,57 @@ function pkg.mod(t, key, value)
     return pkg.del(t, key) and pkg.add(t, key, value, true)
 end
 
--- Deletes and removes the insertion table entries for the keys you pass.
+--- Deletes and removes the insertion table entries for the keys you pass.
+-- This function takes an indefinite amount of string arguments. It uses raw assignment to nil values.
+-- @param t The ordered table.
+-- @param ... The keys you wish to delete.
+-- @return Returns the amount of keys deleted.
 function pkg.del(t, ...)
-    if use_assertioncalls then
+    if use_assert then
         assert(getmetatable(t).__gc == orderedmetatable.__gc, "t must be an orderedtable.")
     end
 
-    local id = predef_table_unqid or ssub(tostring(t), 8)
+    local L1 = L1_indexkey[t]
+    local L2 = L2_keyindex[t]
 
-    if not ins_order[id] or not key_ins_order[id] then
-        return false, "this orderedtable is empty (ins_order[id] or key_ins_order[id] is nil/empty)"
+    if not L1 or not L2 then
+        return false
     end
 
-    for i = 1, select("#", ...) do
-        local key = select(i, ...)
-        local idx = key_ins_order[id][key]
+    local rem = table.remove
+    local raw = rawset
+    local tbl = {...}
+    local amt = 0
 
-        if not idx then -- Including this check above would potentially raise an attempt to index nil error.
-            return false, "this ordered table is empty (idx == "..tostring(idx)..")"
+    for i = 1, #tbl do
+        local key = tbl[i]
+        local idx = L1[key]
+
+        if idx then
+            rem(L1_indexkey[t], idx)
+
+            L2_keyindex[t][key] = nil
+            raw(t, key, nil)
+
+            amt = amt + 1
         end
-
-        tremove(ins_order[id], idx)
-        key_ins_order[id][key] = nil
-        rawset(t, key, nil)
     end
 
-    return true
+    return amt
 end
 
--- Gets an ordered field's value by its insertion index.
--- Setting `give_key_name` to `true` returns (key_name, key_value) instead of key_value.
+--- Gets an ordered field's value by its insertion index.
+-- @param t The ordered table.
+-- @param idx The numeric index to read.
+-- @param give_key_name A boolean indicating whether to also return the key's name.
+-- @return The key's value or the key's name and value, respectively.
 function pkg.getindex(t, idx, give_key_name)
-    if use_assertioncalls == true then
+    if use_assert == true then
         assert(type(idx) == "number", "idx must be a number.")
         assert(getmetatable(t).__gc == orderedmetatable.__gc, "t must be an orderedtable.")
     end
 
-    local id = predef_table_unqid or ssub(tostring(t), 8)
-    local kstr = ins_order[id]
+    local kstr = L1_indexkey[t]
 
     if not kstr then
         return nil, "this table has no keys"
@@ -213,43 +235,57 @@ function pkg.getindex(t, idx, give_key_name)
     end
 end
 
--- Returns the insertion index of the key.
+--- Returns the insertion index of the key.
+-- @param t The ordered table.
+-- @param key The key to read.
+-- @return The key's insertion index (number), or nil if it wasn't found.
 function pkg.keyindex(t, key)
-    if use_assertioncalls == true then
+    if use_assert == true then
         assert(type(key) == "string", "key must be a string.")
         assert(getmetatable(t).__gc == orderedmetatable.__gc, "t must be an orderedtable.")
     end
 
-    local addr = predef_table_unqid or ssub(tostring(t), 8)
-    local kstr = key_ins_order[addr]
+    local kstr = L2_keyindex[t]
 
     if not kstr then
-        return nil, "this table has no keys"
+        return nil
     else
         return kstr[key]
     end
 end
 
--- Whether or not to use assertion calls in these package's functions.
+--- Returns the amount of ordered keys in this ordered table.
+-- @param t The ordered table.
+-- @return The amount of ordered keys, or nil if this table isn't an ordered table.
+function pkg.orderedlen(t)
+    local entry = L1_indexkey[t]
+
+    if entry == nil then
+        return nil
+    else
+        return #entry
+    end
+end
+
+--- Whether or not to use assertion calls in these package's functions.
 -- Assertion calls can add upwards of 30% overhead during heavy stress.
---
 -- There's no reason to keep using assertion calls if your code is stable & you're familiar with ovtable.
+-- @param state A boolean indicating whether to use assertion calls.
+-- @return This function has no return.
 function pkg.assertioncalls(state)
-    use_assertioncalls = state
+    use_assert = state
 end
 
--- If you're going to perform many ordered operations against a single table, use this.
--- It'll remove string processing overhead from the package functions, since the ID won't be internally calculated.
---
--- Set `memory_address` to nil to repermit internal computation.
--- Set `memory_address` to `pkg.generate_unqid` to do otherwise.
-function pkg.set_predef_table_unqid(memory_address)
-    predef_table_unqid = memory_address
-end
+--- Fetch the internal L1 table. Useful for debugging and issue reporting.
+function pkg.get_l1() return L1_indexkey end
+--- Fetch the internal L2 table. Useful for debugging and issue reporting.
+function pkg.get_l2() return L2_keyindex end
 
--- Returns the unique ID for this table.
-function pkg.generate_unqid(ttable)
-    return ssub(tostring(ttable), 8)
-end
+--- Sets a predefined table identifier.
+-- Deprecated; first-class table references are used instead of strings now.
+function pkg.set_predef_table_unqid(...) return "a" end
+--- Returns the unique ID for this table.
+-- Deprecated; first-class table references are used instead of strings now.
+function pkg.generate_unqid(...) end
 
 return pkg
