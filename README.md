@@ -36,7 +36,7 @@ Lua >= 5.2.
 Yes!
 ```lua
 local otable = require "ovtable"
-local mytable = otable.orderedtable()
+local mytable = otable.new()
 
 mytable[1] = "hello world"
 mytable.key = "hello world"
@@ -46,136 +46,11 @@ Works fine!
 #### Can I use these functions with method syntax?
 Yes! `t:getindex(...)` is equal to `pkg.getindex(t, ...)`.
 
-#### Nuance on how loops work
-- If you set `override_pairs` as `true`, then `pairs` will behave as an `orderediterator`.
-  - If you wish to circumvent this behavior in one specific loop, use the `next` function instead of `pairs`.
- 
-- If `pairs` was not overridden, then you can use the `orderediterator` function as your iterator:
-```lua
-local o = require "ovtable"
-local t = o.orderedtable()
-
-for key, value in t:orderediterator() do
-  print(key, value)
-end
-```
-
 #### How do I modify a key without resetting its order?
 Use the traditional `t.key = newvalue` syntax.
 
 #### How can I change the metatable of my ordered table?
-Your boilerplate metatable needs to implement `pkg.orderedmetatable.__gc` and `pkg.orderedmetatable.__index`. See this code:
-```lua
-local o = require "ovtable"
-local t = o.orderedtable()
-
-local basemt = o.orderedmetatable
-basemt.__metamethod = ...
-
-setmetatable(t, basemt)
-```
-If you fail to set `__gc` as `orderedmetatable.__gc`, then your memory will leak, because L1 & L2 table cleanup won't invoke.
-You may override `__index`, but you'll need to implement method support yourself when you do that. It points to the package table by default.
-
-## Performance
-### Insertion Times
-```lua
-local tt = otable.orderedtable()
-local now = os.clock()
-
-for i = 1, 100000 do
-    local k = "key"..tostring(i)
-    local v = "val"..tostring(i)
-
-    tt:add(k, v)
-end
-
-print("Took "..tostring(os.clock() - now).." to insert 100,000 keys.")
-```
-- Results:
-  - ~350ms for 100,000 keys, inflated by string computation times inside of the test.
-  - ~230ms for 100,000 keys using optional optimizations.
-
-### Hash Lookup Times
-```lua
-local tt = otable.orderedtable()
-local now = os.clock()
-
-tt:add("key", "value")
-
-for i = 1, 100000 do
-    local v = tt["key"]
-end
-
-print("Took "..tostring(os.clock() - now).." to lookup 100,000 keys.")
-```
-- Results:
-  - ~900ns (0.9ms) for 100,000 keys.
-
-### Key Modification & Reorder Times
-```lua
-local tt = otable.orderedtable()
-local now = os.clock()
-
-tt:add("key", "value")
-
-for i = 1, 100000 do
-    tt:mod("key", "newvalue")
-end
-
-print("Took "..tostring(os.clock() - now).." to modify & reorder 100,000 keys.")
-```
-- Results:
-  - ~250ms for 100,000 keys.
-  - ~101ms for 100,000 keys using optional optimizations.
-
-### Traditional Key Modification Times
-```lua
-local tt = otable.orderedtable()
-local now = os.clock()
-
-tt:add("key", "value")
-
-for i = 1, 100000 do
-    tt.key = "newvalue"
-end
-
-print("Took "..tostring(os.clock() - now).." to modify 100,000 keys.")
-```
-- Results:
-  - Typically less than 1 millisecond for 100,000 keys.
-
-### Lookup By Insertion Index Times
-```lua
-local tt = otable.orderedtable()
-
-for i = 1, 10000 do
-    tt:add("key"..tostring(i), "val"..tostring(i))
-end
-
-local now = os.clock()
-
-tt:add("key", "value")
-
-for i = 1, 100000 do
-    local val = tt:getindex(i)
-end
-
-print("Took "..tostring(os.clock() - now).." to index 100,000 keys by their insertion index.")
-```
-- Results:
-  - ~80ms for 100,000 keys.
-  - ~18ms for 100,000 keys using optional optimizations.
-
-These benchmarks were performed on an AMD-FX6300 @ 4.1GHz, using 800Mhz dual-channel DDR3 memory. You may see *much* better results on modern hardware.
-
-## Optional Optimizations
-- Optional optimizations reduce safety assuming trust from the user. Reducing safety reduces the computation required to execute an ordered operation. `ovtable` features 2 optional optimizations:
-  - `function assertioncalls(boolean)`
-    - This toggles the use of assertion calls in package functions.
-        - This increases benchmark performance ~25% across the board, given you're familiar with what you're doing.
-  
-By using optional optimizations, you're agreeing with yourself that you're knowledgable enough to debug worse error messages, or familiar enough with `ovtable` to avoid errors as a whole. These options are best used in heavy stress environments (i.e, a benchmark) and are more harm than foul when used normally.
+You need to implement `__gc` of the `ovtable.metatable` field, otherwise your memory will leak. You can implement this functionality yourself with a custom GC method by clearing your tables first-class entry key in the internal tables (that you can read with `get_l1()` and `get_l2()`. Furthermore, `__index` needs to implement the `ovtable` package as a failsafe for universal method support.
 
 ## The End
 If you fancy this project, give it a star!
