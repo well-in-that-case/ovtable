@@ -14,22 +14,19 @@ Visit the [reference.](https://well-in-that-case.github.io/ovtable/)
 Lua >= 5.2.
 
 ## Why you should use this over other implementations?
-- Efficency:
-  - ovtable avoids usage of proxy tables to ensure the highest lookup and insertion performance. Likewise, linked lists are avoided to prevent unneeded hash lookups and seamlessly implement ordered fields in any dynamic environment that may not restrict this table to ordered operations only. You can make any table an ordered table anywhere in your codebase, and behavior will remain identical. Among other design aspects, this makes ovtable faster than every LuaWiki implementation, while boasting superior features.
-
-- Features & user-friendliness:
-  - Direct table behavior isn't modified in any way. You can replace every table in a large codebase, and it'll be compatible.
-    - The only change is a metatable which, by default, only modifies garbage collection to clean the internal tables & support universal method usage.
-  - I enjoy neat QoL features inside packages that I use, so you can expect those here as well.
-
-- Extendable:
-  - ovtable is absurdly simple and allows you to do pretty much anything you want to your table.
-- Slowly becoming time-tested:
-  - ovtable is gaining nearly 2,000 downloads every day on Luarocks without a single issue reported.
+- Zero-overhead lookups.
+- Helps enhance your readability.
+- Good overall run-time performance.
+- Zero-overhead assignment outside of ordered operations.
+- Becoming polished to reduce your key-strokes, and henceforth reduce errors.
+- Very good codebase compatibility with large windows for zero-overhead operations.
+- Interested in making the developer experience easier, for such syntactic sugar implementations.
+- Compatible with sandboxed developer environments, because it's written in plain Lua.
+- No limitation on your keys. Your table can harbor ordered, unordered, numeric, and first-class object keys.
 
 ## How It Works
 - ovtable doesn't modify your table at all. 
-  - It only attaches a metatable to handle garbage collection, optionally extend `pairs` functionality, and add method support with `__index`.
+  - It only attaches a metatable to handle garbage collection & add method support with `__index`.
 - When you add a new key, ovtable _only_ keeps a record of _when_ it was added to an internal structure.
 
 #### Can I still use numeric indices or normal fields?
