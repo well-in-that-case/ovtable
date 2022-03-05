@@ -60,70 +60,93 @@
 <p> <h3>What are the cons of this package?</h3>
  Well, you can replace every existing table in your codebase with an ordered one and it'll behave exactly the same with the exact same performance.
  The only change I make is your metatable. I need to control garbage collection to prevent internal memory leaks, and I need to set the index metamethod for universal method support.
-<p> As a result, you need to implement these when you override the metatable yourself. Not much of a problem though, because the orderedmetatable field is the base metatable you can build on.
- Take your metatable, set its GC metamethod as the orderedmetatable's base, and the index metamethod appropriately. Then you're fine.
-</p>
+<p> As a result, you need to implement these when you override the metatable yourself. Not much of a problem though, because the metatable field is the base metatable you can build on.
+ Take your metatable, set its GC metamethod as the metatable's base, and the index metamethod appropriately. Then you're fine.
+<p> <h3>Why should I use this module?</h3>
+ <ol>
+  <li>Zero-overhead lookups.</li>
+  <li>Helps enhance your readability.</li>
+  <li>Good overall run-time performance.</li>
+  <li>Zero-overhead assignment outside of ordered operations.</li>
+  <li>Becoming polished to reduce your key-strokes, and henceforth reduce errors.</li>
+  <li>Very good codebase compatibility with large windows for zero-overhead operations.</li>
+  <li>Interested in making the developer experience easier, for such syntactic sugar implementations.</li>
+  <li>Compatible with sandboxed developer environments, because it's written in plain Lua.</li>
+  <li>No limitation on your keys. Your table can harbor ordered, unordered, numeric, and first-class object keys.</li>
+ </ol></p>
 
 
 <h2><a href="#Functions">Functions</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#pkg.orderedtable">pkg.orderedtable (override_pairs)</a></td>
-	<td class="summary">Returns a new orderedtable.</td>
+	<td class="name" nowrap><a href="#new">new ()</a></td>
+	<td class="summary">Returns a new ordered table.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#pkg.orderediterator">pkg.orderediterator (...)</a></td>
-	<td class="summary">Returns an iterator for ordered fields.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#pkg.add">pkg.add (t, key, value, raw)</a></td>
+	<td class="name" nowrap><a href="#add">add (t, key, value, raw)</a></td>
 	<td class="summary">Performs t[key] = value & updates the insertion table accordingly.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#pkg.mod">pkg.mod (t, key, value)</a></td>
+	<td class="name" nowrap><a href="#mod">mod (t, key, value, raw)</a></td>
 	<td class="summary">Modify and reorder this key.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#pkg.del">pkg.del (t, ...)</a></td>
+	<td class="name" nowrap><a href="#del">del (tt, ...)</a></td>
 	<td class="summary">Deletes and removes the insertion table entries for the keys you pass.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#pkg.getindex">pkg.getindex (t, idx, give_key_name)</a></td>
+	<td class="name" nowrap><a href="#swap">swap (t, key1, key2)</a></td>
+	<td class="summary">Swaps the insertion indexes of the keys.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#iterator">iterator (t)</a></td>
+	<td class="summary">Returns an iterator for ordered fields.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#clear_to">clear_to (t, num)</a></td>
+	<td class="summary">Clears every ordered key up until index num.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#clear_from">clear_from (t, num1, num2)</a></td>
+	<td class="summary">Clears every ordered key between insertion index num1 & num2.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#getindex">getindex (t, idx, give_key_name)</a></td>
 	<td class="summary">Gets an ordered field's value by its insertion index.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#pkg.keyindex">pkg.keyindex (t, key)</a></td>
+	<td class="name" nowrap><a href="#keyindex">keyindex (t, key)</a></td>
 	<td class="summary">Returns the insertion index of the key.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#pkg.orderedlen">pkg.orderedlen (t)</a></td>
+	<td class="name" nowrap><a href="#orderedlen">orderedlen (t)</a></td>
 	<td class="summary">Returns the amount of ordered keys in this ordered table.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#pkg.assertioncalls">pkg.assertioncalls (state)</a></td>
-	<td class="summary">Whether or not to use assertion calls in these package's functions.</td>
+	<td class="name" nowrap><a href="#clear_to_key">clear_to_key (t, key)</a></td>
+	<td class="summary">Clears every ordered key up until key is found.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#pkg.get_l1">pkg.get_l1 ()</a></td>
+	<td class="name" nowrap><a href="#clear_from_key">clear_from_key (t, key)</a></td>
+	<td class="summary">Clears every ordered key that comes after key.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#clear_between_keys">clear_between_keys (t, key1, key2)</a></td>
+	<td class="summary">Clears every ordered key between key1 and key2.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#get_l1">get_l1 ()</a></td>
 	<td class="summary">Fetch the internal L1 table.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#pkg.get_l2">pkg.get_l2 ()</a></td>
+	<td class="name" nowrap><a href="#get_l2">get_l2 ()</a></td>
 	<td class="summary">Fetch the internal L2 table.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#pkg.set_predef_table_unqid">pkg.set_predef_table_unqid (...)</a></td>
-	<td class="summary">Sets a predefined table identifier.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#pkg.generate_unqid">pkg.generate_unqid (...)</a></td>
-	<td class="summary">Returns the unique ID for this table.</td>
 	</tr>
 </table>
 <h2><a href="#Fields">Fields</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#pkg.orderedmetatable">pkg.orderedmetatable</a></td>
+	<td class="name" nowrap><a href="#metatable">metatable</a></td>
 	<td class="summary">This is your base metatable when you wish to create overrides.</td>
 	</tr>
 </table>
@@ -136,19 +159,13 @@
 
     <dl class="function">
     <dt>
-    <a name = "pkg.orderedtable"></a>
-    <strong>pkg.orderedtable (override_pairs)</strong>
+    <a name = "new"></a>
+    <strong>new ()</strong>
     </dt>
     <dd>
-    Returns a new orderedtable.  Optionally override the __pairs metamethod.
+    Returns a new ordered table.
 
 
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">override_pairs</span>
-         A boolean indicating whether to overrride the __pairs metamethod.
-        </li>
-    </ul>
 
 
 
@@ -156,29 +173,8 @@
 
 </dd>
     <dt>
-    <a name = "pkg.orderediterator"></a>
-    <strong>pkg.orderediterator (...)</strong>
-    </dt>
-    <dd>
-    Returns an iterator for ordered fields.  If you set override_pairs as true, this is the same as pairs.
- This function takes the same parameters you'd give to __pairs.
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">...</span>
-
-        </li>
-    </ul>
-
-
-
-
-
-</dd>
-    <dt>
-    <a name = "pkg.add"></a>
-    <strong>pkg.add (t, key, value, raw)</strong>
+    <a name = "add"></a>
+    <strong>add (t, key, value, raw)</strong>
     </dt>
     <dd>
     Performs t[key] = value & updates the insertion table accordingly.
@@ -188,32 +184,31 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">t</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
          The ordered table.
         </li>
         <li><span class="parameter">key</span>
+            <span class="types"><span class="type">any</span></span>
          The key to use.
         </li>
         <li><span class="parameter">value</span>
+            <span class="types"><span class="type">any</span></span>
          The value to use.
         </li>
         <li><span class="parameter">raw</span>
-         A boolean indicating whether to use raw assignment (via rawset) or __newindex assignment.
+            <span class="types"><span class="type">boolean</span></span>
+         Whether to use raw assignment (via rawset) or __newindex assignment.
         </li>
     </ul>
 
-    <h3>Returns:</h3>
-    <ol>
-
-        A boolean indicating if the key was added successfully.
-    </ol>
 
 
 
 
 </dd>
     <dt>
-    <a name = "pkg.mod"></a>
-    <strong>pkg.mod (t, key, value)</strong>
+    <a name = "mod"></a>
+    <strong>mod (t, key, value, raw)</strong>
     </dt>
     <dd>
     Modify and reorder this key.
@@ -223,13 +218,20 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">t</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
          The ordered table.
         </li>
         <li><span class="parameter">key</span>
+            <span class="types"><span class="type">any</span></span>
          The key to modify.
         </li>
         <li><span class="parameter">value</span>
+            <span class="types"><span class="type">any</span></span>
          The new value for this key.
+        </li>
+        <li><span class="parameter">raw</span>
+            <span class="types"><span class="type">boolean</span></span>
+         Whether to use raw operations to nil values.
         </li>
     </ul>
 
@@ -239,17 +241,18 @@
 
 </dd>
     <dt>
-    <a name = "pkg.del"></a>
-    <strong>pkg.del (t, ...)</strong>
+    <a name = "del"></a>
+    <strong>del (tt, ...)</strong>
     </dt>
     <dd>
     Deletes and removes the insertion table entries for the keys you pass.
- This function takes an indefinite amount of string arguments. It uses raw assignment to nil values.
+ This function uses raw operations to remove keys from the table itself.
 
 
     <h3>Parameters:</h3>
     <ul>
-        <li><span class="parameter">t</span>
+        <li><span class="parameter">tt</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
          The ordered table.
         </li>
         <li><span class="parameter">...</span>
@@ -260,7 +263,8 @@
     <h3>Returns:</h3>
     <ol>
 
-        Returns the amount of keys deleted.
+           <span class="types"><span class="type">number</span> or <span class="type">false</span></span>
+        The amount of keys deleted, or false when tt is unknown.
     </ol>
 
 
@@ -268,30 +272,34 @@
 
 </dd>
     <dt>
-    <a name = "pkg.getindex"></a>
-    <strong>pkg.getindex (t, idx, give_key_name)</strong>
+    <a name = "swap"></a>
+    <strong>swap (t, key1, key2)</strong>
     </dt>
     <dd>
-    Gets an ordered field's value by its insertion index.
+    Swaps the insertion indexes of the keys.
 
 
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">t</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
          The ordered table.
         </li>
-        <li><span class="parameter">idx</span>
-         The numeric index to read.
+        <li><span class="parameter">key1</span>
+            <span class="types"><span class="type">any</span></span>
+         The first key.
         </li>
-        <li><span class="parameter">give_key_name</span>
-         A boolean indicating whether to also return the key's name.
+        <li><span class="parameter">key2</span>
+            <span class="types"><span class="type">any</span></span>
+         The second key.
         </li>
     </ul>
 
     <h3>Returns:</h3>
     <ol>
 
-        The key's value or the key's name and value, respectively.
+           <span class="types"><span class="type">boolean</span></span>
+        Returns false if no keys were swapped (likely not ordered keys).
     </ol>
 
 
@@ -299,8 +307,131 @@
 
 </dd>
     <dt>
-    <a name = "pkg.keyindex"></a>
-    <strong>pkg.keyindex (t, key)</strong>
+    <a name = "iterator"></a>
+    <strong>iterator (t)</strong>
+    </dt>
+    <dd>
+    Returns an iterator for ordered fields.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">t</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+         The ordered table.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "clear_to"></a>
+    <strong>clear_to (t, num)</strong>
+    </dt>
+    <dd>
+    Clears every ordered key up until index num.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">t</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+         The ordered table.
+        </li>
+        <li><span class="parameter">num</span>
+            <span class="types"><span class="type">number</span></span>
+         The amount of ordered keys to clear, from the bottom up.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">number</span></span>
+        The amount of keys deleted.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "clear_from"></a>
+    <strong>clear_from (t, num1, num2)</strong>
+    </dt>
+    <dd>
+    Clears every ordered key between insertion index num1 & num2.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">t</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+         The ordered table.
+        </li>
+        <li><span class="parameter">num1</span>
+            <span class="types"><span class="type">number</span></span>
+         The starting index.
+        </li>
+        <li><span class="parameter">num2</span>
+            <span class="types"><span class="type">number</span></span>
+         The ending index.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">number</span></span>
+        The amount of keys deleted.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "getindex"></a>
+    <strong>getindex (t, idx, give_key_name)</strong>
+    </dt>
+    <dd>
+    Gets an ordered field's value by its insertion index.
+ Setting the last parameter as true will also return the key name.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">t</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+         The ordered table.
+        </li>
+        <li><span class="parameter">idx</span>
+            <span class="types"><span class="type">number</span></span>
+         The numeric index to read.
+        </li>
+        <li><span class="parameter">give_key_name</span>
+            <span class="types"><span class="type">boolean</span></span>
+         A boolean indicating whether to also return the key name.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">any</span> or <span class="type">any,any</span></span>
+        The key value, or alernatively the key name & value.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "keyindex"></a>
+    <strong>keyindex (t, key)</strong>
     </dt>
     <dd>
     Returns the insertion index of the key.
@@ -309,9 +440,11 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">t</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
          The ordered table.
         </li>
         <li><span class="parameter">key</span>
+            <span class="types"><span class="type">any</span></span>
          The key to read.
         </li>
     </ul>
@@ -319,7 +452,8 @@
     <h3>Returns:</h3>
     <ol>
 
-        The key's insertion index (number), or nil if it wasn't found.
+           <span class="types"><span class="type">number</span> or <span class="type">nil</span></span>
+        The key's insertion index.
     </ol>
 
 
@@ -327,8 +461,8 @@
 
 </dd>
     <dt>
-    <a name = "pkg.orderedlen"></a>
-    <strong>pkg.orderedlen (t)</strong>
+    <a name = "orderedlen"></a>
+    <strong>orderedlen (t)</strong>
     </dt>
     <dd>
     Returns the amount of ordered keys in this ordered table.
@@ -337,6 +471,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">t</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
          The ordered table.
         </li>
     </ul>
@@ -344,7 +479,8 @@
     <h3>Returns:</h3>
     <ol>
 
-        The amount of ordered keys, or nil if this table isn't an ordered table.
+           <span class="types"><span class="type">number</span></span>
+        The amount of ordered keys.
     </ol>
 
 
@@ -352,26 +488,30 @@
 
 </dd>
     <dt>
-    <a name = "pkg.assertioncalls"></a>
-    <strong>pkg.assertioncalls (state)</strong>
+    <a name = "clear_to_key"></a>
+    <strong>clear_to_key (t, key)</strong>
     </dt>
     <dd>
-    Whether or not to use assertion calls in these package's functions.
- Assertion calls can add upwards of 30% overhead during heavy stress.
- There's no reason to keep using assertion calls if your code is stable & you're familiar with ovtable.
+    Clears every ordered key up until key is found.
 
 
     <h3>Parameters:</h3>
     <ul>
-        <li><span class="parameter">state</span>
-         A boolean indicating whether to use assertion calls.
+        <li><span class="parameter">t</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+         The ordered table.
+        </li>
+        <li><span class="parameter">key</span>
+            <span class="types"><span class="type">any</span></span>
+         The key.
         </li>
     </ul>
 
     <h3>Returns:</h3>
     <ol>
 
-        This function has no return.
+           <span class="types"><span class="type">number</span></span>
+        The amount of keys deleted.
     </ol>
 
 
@@ -379,70 +519,106 @@
 
 </dd>
     <dt>
-    <a name = "pkg.get_l1"></a>
-    <strong>pkg.get_l1 ()</strong>
+    <a name = "clear_from_key"></a>
+    <strong>clear_from_key (t, key)</strong>
+    </dt>
+    <dd>
+    Clears every ordered key that comes after key.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">t</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+         The ordered table.
+        </li>
+        <li><span class="parameter">key</span>
+            <span class="types"><span class="type">any</span></span>
+         The key.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">number</span></span>
+        The amount of keys deleted.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "clear_between_keys"></a>
+    <strong>clear_between_keys (t, key1, key2)</strong>
+    </dt>
+    <dd>
+    Clears every ordered key between key1 and key2.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">t</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+         The ordered table.
+        </li>
+        <li><span class="parameter">key1</span>
+            <span class="types"><span class="type">any</span></span>
+         The starting key.
+        </li>
+        <li><span class="parameter">key2</span>
+            <span class="types"><span class="type">any</span></span>
+         The ending key.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">number</span></span>
+        The amount of keys deleted.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "get_l1"></a>
+    <strong>get_l1 ()</strong>
     </dt>
     <dd>
     Fetch the internal L1 table.  Useful for debugging and issue reporting.
 
 
 
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+        The internal L1 table, which maps index -> key pairs.
+    </ol>
 
 
 
 
 </dd>
     <dt>
-    <a name = "pkg.get_l2"></a>
-    <strong>pkg.get_l2 ()</strong>
+    <a name = "get_l2"></a>
+    <strong>get_l2 ()</strong>
     </dt>
     <dd>
     Fetch the internal L2 table.  Useful for debugging and issue reporting.
 
 
 
+    <h3>Returns:</h3>
+    <ol>
 
-
-
-
-</dd>
-    <dt>
-    <a name = "pkg.set_predef_table_unqid"></a>
-    <strong>pkg.set_predef_table_unqid (...)</strong>
-    </dt>
-    <dd>
-    Sets a predefined table identifier.
- Deprecated; first-class table references are used instead of strings now.
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">...</span>
-
-        </li>
-    </ul>
-
-
-
-
-
-</dd>
-    <dt>
-    <a name = "pkg.generate_unqid"></a>
-    <strong>pkg.generate_unqid (...)</strong>
-    </dt>
-    <dd>
-    Returns the unique ID for this table.
- Deprecated; first-class table references are used instead of strings now.
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">...</span>
-
-        </li>
-    </ul>
-
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+        The internal L2 table, which maps key -> index pairs.
+    </ol>
 
 
 
@@ -453,8 +629,8 @@
 
     <dl class="function">
     <dt>
-    <a name = "pkg.orderedmetatable"></a>
-    <strong>pkg.orderedmetatable</strong>
+    <a name = "metatable"></a>
+    <strong>metatable</strong>
     </dt>
     <dd>
     This is your base metatable when you wish to create overrides.
@@ -474,7 +650,7 @@
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
-<i style="float:right;">Last updated 2022-03-03 14:33:49 </i>
+<i style="float:right;">Last updated 2022-03-05 17:50:51 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>
